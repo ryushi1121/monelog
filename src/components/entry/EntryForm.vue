@@ -108,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEntries } from '../../composables/useEntries';
 import { useCategorySettings } from '../../composables/useStoreSettings';
@@ -149,14 +149,26 @@ const onCategoryChange = () => {
   formData.value.subcategory = '';
 };
 
-onMounted(() => {
-  if (isEditMode.value) {
+const initForm = () => {
+  if (props.entryId) {
     const existing = entries.value.find(e => e.id === props.entryId);
     if (existing) {
       formData.value = { ...existing };
+      return;
     }
   }
-});
+  formData.value = {
+    date: formatDateForAPI(new Date()),
+    type: '支出',
+    category: '',
+    subcategory: '',
+    amount: '',
+    memo: '',
+  };
+};
+
+onMounted(initForm);
+watch(() => props.entryId, initForm);
 
 const handleDelete = async () => {
   const entry = entries.value.find(e => e.id === props.entryId);
