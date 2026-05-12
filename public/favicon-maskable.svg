@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- 背景（全面）-->
+  <rect width="512" height="512" fill="url(#bg)" />
+
+  <!-- 安全領域（40%マージン）内にコンテンツを収める: 103px〜409px -->
+  <g transform="translate(256, 256) scale(0.72) translate(-256, -256)" filter="url(#shadow)">
+    <!-- 財布の本体 -->
+    <rect x="80" y="175" width="352" height="230" rx="28" fill="none" stroke="#ffffff" stroke-width="24"/>
+    <!-- 財布のフラップ上部 -->
+    <path d="M 80,230 L 432,230" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
+    <!-- コイン入れ（右側の出っ張り） -->
+    <rect x="320" y="255" width="112" height="100" rx="20" fill="none" stroke="#ffffff" stroke-width="20"/>
+    <!-- コイン入れの穴 -->
+    <circle cx="376" cy="305" r="22" fill="none" stroke="#ffffff" stroke-width="18"/>
+    <!-- 円マーク -->
+    <text x="180" y="340" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="96" font-weight="900" fill="#ffffff" text-anchor="middle">¥</text>
+  </g>
+</svg>

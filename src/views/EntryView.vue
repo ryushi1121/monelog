@@ -1,0 +1,63 @@
+<template>
+  <div class="entry-view">
+    <div class="page-header">
+      <h1 class="page-title">{{ isEdit ? '記録を編集' : '記録する' }}</h1>
+      <p class="page-subtitle">{{ isEdit ? '記録内容を修正します' : '収入・支出を記録しましょう' }}</p>
+    </div>
+    
+    <div class="entry-content">
+      <EntryForm :entryId="route.params.id" />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import EntryForm from '../components/entry/EntryForm.vue';
+
+const route = useRoute();
+const isEdit = computed(() => !!route.params.id);
+</script>
+
+<style scoped>
+.entry-view {
+  padding: 1rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  color: var(--text-sub);
+  font-size: 0.95rem;
+}
+
+.entry-content {
+  margin-bottom: 3rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
