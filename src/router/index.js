@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
 
 const routes = [
   {
@@ -58,8 +59,15 @@ const router = createRouter({
 
 // ナビゲーションガード: 未認証時はログイン画面へ
 router.beforeEach((to, from, next) => {
+  const { isAuthPending } = useAuth()
   const accessToken = localStorage.getItem('google_access_token')
   const requiresAuth = to.meta.requiresAuth !== false
+
+  // サイレントリフレッシュ中はリダイレクトしない（App.vueがローディング画面を表示）
+  if (isAuthPending.value) {
+    next()
+    return
+  }
 
   if (requiresAuth && !accessToken) {
     next({ name: 'Login' })

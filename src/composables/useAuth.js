@@ -2,6 +2,7 @@ import { ref, shallowRef, readonly } from 'vue'
 
 // ── 状態（モジュールスコープでシングルトン） ──
 const isLoggedIn = ref(false)
+const isAuthPending = ref(false)
 const user = ref(null)
 const accessToken = ref(null)
 const tokenClient = shallowRef(null)
@@ -195,15 +196,20 @@ export function useAuth() {
 
     accessToken.value = savedToken
     user.value = JSON.parse(savedUser)
-    isLoggedIn.value = true
 
     const remainingSeconds = (expiresAt - Date.now()) / 1000
-    if (remainingSeconds < 300) {
-      tryRefreshSilently().catch(() => {
-        // リフレッシュ失敗は useCalendar の 401 リトライ時に対処する
-      })
-    } else {
+
+    if (remainingSeconds > 300) {
+      // トークンはまだ有効
+      isLoggedIn.value = true
       scheduleTokenRefresh(remainingSeconds)
+    } else {
+      // トークンが期限切れまたは間もなく切れる → サイレントリフレッシュを待ってから判断
+      isAuthPending.value = true
+      tryRefreshSilently()
+        .then(() => { isLoggedIn.value = true })
+        .catch(() => { logout() })
+        .finally(() => { isAuthPending.value = false })
     }
   }
 
@@ -215,6 +221,7 @@ export function useAuth() {
 
   return {
     isLoggedIn: readonly(isLoggedIn),
+    isAuthPending: readonly(isAuthPending),
     user: readonly(user),
     accessToken: readonly(accessToken),
     authError: readonly(authError),

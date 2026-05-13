@@ -1,6 +1,12 @@
 <template>
+  <!-- サイレントリフレッシュ確認中 -->
+  <div v-if="isAuthPending" class="auth-pending">
+    <div class="auth-pending-spinner"></div>
+    <p class="auth-pending-text">接続を確認しています...</p>
+  </div>
+
   <!-- ログイン画面はレイアウトなし -->
-  <div v-if="$route.meta.layout === 'none'" class="app-no-layout">
+  <div v-else-if="$route.meta.layout === 'none'" class="app-no-layout">
     <router-view />
   </div>
 
@@ -29,7 +35,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from './composables/useAuth'
 import { useEntries } from './composables/useEntries'
@@ -41,8 +47,15 @@ export default {
   components: { AppHeader, AppSidebar },
   setup() {
     const router = useRouter()
-    const { user, logout } = useAuth()
+    const { user, isLoggedIn, isAuthPending, logout } = useAuth()
     const { clearEntries } = useEntries()
+
+    // サイレントリフレッシュ失敗時にログイン画面へ
+    watch(isAuthPending, (pending) => {
+      if (!pending && !isLoggedIn.value) {
+        router.push({ name: 'Login' })
+      }
+    })
     const sidebarOpen = ref(window.innerWidth >= 1024)
 
     const handleResize = () => {
@@ -67,6 +80,7 @@ export default {
 
     return {
       user,
+      isAuthPending,
       sidebarOpen,
       handleLogout
     }
@@ -75,6 +89,34 @@ export default {
 </script>
 
 <style scoped>
+.auth-pending {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  gap: var(--spacing-md);
+}
+
+.auth-pending-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.auth-pending-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .app-no-layout {
   min-height: 100vh;
 }
