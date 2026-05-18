@@ -18,19 +18,19 @@ const routes = [
     path: '/entry',
     name: 'Entry',
     component: () => import('../views/EntryView.vue'),
-    meta: { requiresAuth: true, title: '収支登録', icon: 'fa-solid fa-pen-to-square' }
+    meta: { requiresAuth: true, title: '明細登録', icon: 'fa-solid fa-pen-to-square' }
   },
   {
     path: '/entry/:id',
     name: 'EntryEdit',
     component: () => import('../views/EntryView.vue'),
-    meta: { requiresAuth: true, title: '収支編集', icon: 'fa-solid fa-pen-to-square' }
+    meta: { requiresAuth: true, title: '明細編集', icon: 'fa-solid fa-pen-to-square' }
   },
   {
     path: '/list',
     name: 'List',
     component: () => import('../views/ListView.vue'),
-    meta: { requiresAuth: true, title: '収支一覧', icon: 'fa-solid fa-list' }
+    meta: { requiresAuth: true, title: '明細一覧', icon: 'fa-solid fa-list' }
   },
   {
     path: '/analytics',

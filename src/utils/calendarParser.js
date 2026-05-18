@@ -58,8 +58,9 @@ export const formatEvent = (entryData) => {
   const nextDate = new Date(dateStr);
   nextDate.setDate(nextDate.getDate() + 1);
 
-  // 収入=Sage(2), 支出=Tomato(11)
-  const colorId = type === '収入' ? '2' : '11';
+  // 収入=Sage(2), 支出=Tomato(11), 貯金=Banana(5), 投資=Peacock(7)
+  const colorMap = { 収入: '2', 支出: '11', 貯金: '5', 投資: '7' };
+  const colorId = colorMap[type] || '11';
 
   return {
     summary,

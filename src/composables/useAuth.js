@@ -111,7 +111,7 @@ export function useAuth() {
       if (response.access_token) {
         window.google.accounts.oauth2.revoke(response.access_token, () => {})
       }
-      authError.value = '収支データを保存するため、カレンダーへのアクセス権限が必要です。チェックボックスをオンにして再度ログインしてください。'
+      authError.value = '明細データを保存するため、カレンダーへのアクセス権限が必要です。チェックボックスをオンにして再度ログインしてください。'
       if (reject) reject(new Error('Insufficient scope'))
       return
     }

@@ -2,18 +2,28 @@
   <div class="entry-form-container">
     <form @submit.prevent="submitForm" class="entry-form">
 
-      <!-- 収入/支出トグル -->
+      <!-- 種別トグル -->
       <div class="type-toggle">
         <button
           type="button"
           :class="['toggle-btn', formData.type === '支出' ? 'active expense' : '']"
-          @click="formData.type = '支出'"
+          @click="setType('支出')"
         >支出</button>
         <button
           type="button"
           :class="['toggle-btn', formData.type === '収入' ? 'active income' : '']"
-          @click="formData.type = '収入'"
+          @click="setType('収入')"
         >収入</button>
+        <button
+          type="button"
+          :class="['toggle-btn', formData.type === '貯金' ? 'active savings' : '']"
+          @click="setType('貯金')"
+        >貯金</button>
+        <button
+          type="button"
+          :class="['toggle-btn', formData.type === '投資' ? 'active investment' : '']"
+          @click="setType('投資')"
+        >投資</button>
       </div>
 
       <!-- 日付 -->
@@ -66,7 +76,12 @@
           type="number"
           v-model.number="formData.amount"
           class="form-control amount-input"
-          :class="formData.type === '収入' ? 'income-input' : 'expense-input'"
+          :class="{
+            'income-input':     formData.type === '収入',
+            'savings-input':    formData.type === '貯金',
+            'investment-input': formData.type === '投資',
+            'expense-input':    formData.type === '支出',
+          }"
           placeholder="0"
           min="0"
           step="1"
@@ -144,6 +159,12 @@ const subcategoryOptions = computed(() => {
   if (!formData.value.category) return [];
   return getSubcategoriesFor(formData.value.type, formData.value.category);
 });
+
+const setType = (type) => {
+  formData.value.type = type;
+  formData.value.category = '';
+  formData.value.subcategory = '';
+};
 
 const onCategoryChange = () => {
   formData.value.subcategory = '';
@@ -263,6 +284,16 @@ const submitForm = async () => {
   color: #fff;
 }
 
+.toggle-btn.active.savings {
+  background: #eab308;
+  color: #fff;
+}
+
+.toggle-btn.active.investment {
+  background: #3b82f6;
+  color: #fff;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -315,6 +346,16 @@ textarea.form-control {
 .income-input:focus {
   border-color: var(--success-color, #22c55e);
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.savings-input:focus {
+  border-color: #eab308;
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
+}
+
+.investment-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .error-message {

@@ -60,7 +60,12 @@
             <span class="dpe-machine">{{ entry.subcategory }}</span>
           </div>
           <div class="dpe-right">
-            <span class="dpe-profit" :class="entry.type === '収入' ? 'positive' : 'negative'">
+            <span class="dpe-profit" :class="{
+              'positive':   entry.type === '収入',
+              'negative':   entry.type === '支出',
+              'savings':    entry.type === '貯金',
+              'investment': entry.type === '投資',
+            }">
               {{ entry.type === '収入' ? '+' : '-' }}{{ formatCurrency(entry.amount) }}
             </span>
           </div>
@@ -112,7 +117,7 @@ const entryNet = (e) => e.type === '収入' ? (e.amount || 0) : -(e.amount || 0)
 const dayTotal = (day) => (entryMap.value[day] || []).reduce((s, e) => s + entryNet(e), 0);
 
 const monthTotal = computed(() => props.entries.reduce((s, e) => s + entryNet(e), 0));
-const monthExp   = computed(() => props.entries.filter(e => e.type === '支出').reduce((s, e) => s + (e.amount || 0), 0));
+const monthExp   = computed(() => props.entries.filter(e => e.type !== '収入').reduce((s, e) => s + (e.amount || 0), 0));
 const monthInc   = computed(() => props.entries.filter(e => e.type === '収入').reduce((s, e) => s + (e.amount || 0), 0));
 
 const selectedDayDow = computed(() => {
@@ -271,8 +276,10 @@ const editEntry = (entry) => {
 }
 
 /* ---- カラー ---- */
-.positive { color: var(--success-color); }
-.negative { color: var(--danger-color); }
+.positive   { color: var(--success-color); }
+.negative   { color: var(--danger-color); }
+.savings    { color: #eab308; }
+.investment { color: #3b82f6; }
 .zero     { color: var(--text-sub); }
 
 /* ---- 月合計 ---- */

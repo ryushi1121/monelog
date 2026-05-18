@@ -15,7 +15,7 @@
           <div class="item-category">{{ entry.category }}</div>
           <div class="item-subcategory" v-if="entry.subcategory">{{ entry.subcategory }}</div>
         </div>
-        <div class="item-amount" :class="entry.type === '収入' ? 'income' : 'expense'">
+        <div class="item-amount" :class="amountClass(entry.type)">
           {{ entry.type === '収入' ? '+' : '-' }}{{ formatCurrency(entry.amount) }}
         </div>
       </div>
@@ -23,7 +23,7 @@
 
     <div v-else class="empty-state">
       <p>履歴がありません</p>
-      <router-link to="/entry" class="btn btn-outline">収支を登録する</router-link>
+      <router-link to="/entry" class="btn btn-outline">明細を登録する</router-link>
     </div>
   </div>
 </template>
@@ -39,6 +39,13 @@ const props = defineProps({
 });
 
 const recentEntries = computed(() => props.entries.slice(0, props.limit));
+
+const amountClass = (type) => {
+  if (type === '収入') return 'income';
+  if (type === '貯金') return 'savings';
+  if (type === '投資') return 'investment';
+  return 'expense';
+};
 </script>
 
 <style scoped>
@@ -131,8 +138,10 @@ const recentEntries = computed(() => props.entries.slice(0, props.limit));
   text-align: right;
 }
 
-.item-amount.income { color: var(--success-color, #22c55e); }
-.item-amount.expense { color: var(--danger-color, #ef4444); }
+.item-amount.income     { color: var(--success-color, #22c55e); }
+.item-amount.expense    { color: var(--danger-color, #ef4444); }
+.item-amount.savings    { color: #eab308; }
+.item-amount.investment { color: #3b82f6; }
 
 .empty-state {
   display: flex;

@@ -69,7 +69,12 @@
           subtitle="Total Expense"
         />
         <SummaryCard
-          :title="`${targetPeriodText}の収支`"
+          :title="`${targetPeriodText}の貯金・投資`"
+          :amount="currentPeriodStats.totalSavingsAndInvestment"
+          subtitle="Savings &amp; Investment"
+        />
+        <SummaryCard
+          :title="`${targetPeriodText}の純残高`"
           :amount="currentPeriodStats.net"
           :isProfit="true"
           subtitle="Net Balance"
@@ -78,7 +83,7 @@
 
       <div class="dashboard-grid">
         <!-- クイック統計 -->
-        <QuickStats :entries="currentPeriodEntries" :title="`${targetPeriodText}の収支サマリー`" class="grid-item" />
+        <QuickStats :entries="currentPeriodEntries" :title="`${targetPeriodText}の明細サマリー`" class="grid-item" />
 
         <!-- 直近の履歴 -->
         <RecentHistory :entries="entries" :limit="5" class="grid-item" />
@@ -165,11 +170,23 @@ const currentPeriodEntries = computed(() => {
 const currentPeriodStats = computed(() => {
   let totalIncome = 0;
   let totalExpense = 0;
+  let totalSavings = 0;
+  let totalInvestment = 0;
   currentPeriodEntries.value.forEach(e => {
-    if (e.type === '収入') totalIncome += e.amount || 0;
-    else totalExpense += e.amount || 0;
+    const amount = e.amount || 0;
+    if (e.type === '収入')      totalIncome     += amount;
+    else if (e.type === '貯金') totalSavings    += amount;
+    else if (e.type === '投資') totalInvestment += amount;
+    else                        totalExpense     += amount;
   });
-  return { totalIncome, totalExpense, net: totalIncome - totalExpense };
+  return {
+    totalIncome,
+    totalExpense,
+    totalSavings,
+    totalInvestment,
+    totalSavingsAndInvestment: totalSavings + totalInvestment,
+    net: totalIncome - totalExpense - totalSavings - totalInvestment,
+  };
 });
 
 const onPeriodChange = () => {

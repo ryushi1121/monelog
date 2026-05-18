@@ -33,6 +33,18 @@
       </div>
     </div>
 
+    <div class="selector-row type-row">
+      <label class="cat-label">種別</label>
+      <div class="type-tabs">
+        <button
+          v-for="t in TYPE_OPTIONS"
+          :key="t.value"
+          :class="['type-tab', { active: selectedType === t.value }, t.cls]"
+          @click="selectedType = t.value"
+        >{{ t.label }}</button>
+      </div>
+    </div>
+
     <div class="selector-row cat-row" v-if="availableCategories.length > 0">
       <label class="cat-label">カテゴリ</label>
       <select v-model="categoryModel" class="cat-select">
@@ -46,11 +58,19 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { useEntries } from '@/composables/useEntries';
 
-const { periodType, periodValue, selectedCategory, availableCategories } = useAnalytics();
+const { periodType, periodValue, selectedCategory, selectedType, availableCategories } = useAnalytics();
+
+const TYPE_OPTIONS = [
+  { label: 'すべて', value: '',   cls: 'tab-all' },
+  { label: '支出',   value: '支出', cls: 'tab-expense' },
+  { label: '収入',   value: '収入', cls: 'tab-income' },
+  { label: '貯金',   value: '貯金', cls: 'tab-savings' },
+  { label: '投資',   value: '投資', cls: 'tab-investment' },
+];
 const { entries } = useEntries();
 
 const categoryModel = computed({
@@ -77,6 +97,8 @@ const setPeriod = (type) => {
     periodValue.value = null;
   }
 };
+
+watch(selectedType, () => { selectedCategory.value = ''; });
 
 onMounted(() => {
   if (periodType.value === 'month' && !periodValue.value) {
@@ -146,6 +168,10 @@ onMounted(() => {
   cursor: pointer;
   opacity: 0.8;
 }
+.type-row {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
 .cat-row {
   border-top: 1px solid var(--border-subtle);
   padding-top: 10px;
@@ -172,4 +198,27 @@ onMounted(() => {
   background: var(--bg-input);
   color: var(--text-main);
 }
+
+.type-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.type-tab {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+.type-tab:hover { background: var(--surface-hover); }
+
+.type-tab.tab-expense.active  { background: var(--danger-color);  color: #fff; border-color: var(--danger-color); }
+.type-tab.tab-income.active   { background: var(--success-color); color: #fff; border-color: var(--success-color); }
+.type-tab.tab-savings.active  { background: #eab308; color: #fff; border-color: #eab308; }
+.type-tab.tab-investment.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+.type-tab.tab-all.active      { background: var(--accent-primary); color: var(--text-inverse); border-color: var(--accent-primary); font-weight: bold; }
 </style>

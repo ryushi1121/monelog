@@ -2,14 +2,14 @@
   <div class="charts-view">
     <div class="page-header">
       <h1 class="page-title">分析</h1>
-      <p class="page-subtitle">収支の傾向・パターンを読む</p>
+      <p class="page-subtitle">明細の傾向・パターンを読む</p>
     </div>
 
     <PeriodSelector />
 
-    <!-- 期間累積収支サマリー -->
+    <!-- 期間累積明細サマリー -->
     <div class="period-summary card mb-4">
-      <span class="summary-label">{{ periodLabel }}の収支合計</span>
+      <span class="summary-label">{{ periodLabel }}の明細合計</span>
       <span class="summary-amount" :class="profitClass">
         {{ formattedProfit }}円
       </span>

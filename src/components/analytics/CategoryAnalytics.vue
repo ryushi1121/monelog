@@ -54,6 +54,90 @@
         </table>
       </div>
 
+      <!-- 貯金セクション -->
+      <div v-if="savingsCategories.length > 0" class="ca-section savings-section">
+        <div class="section-label savings-label">貯金</div>
+        <table class="ca-table">
+          <thead>
+            <tr>
+              <th>カテゴリ</th>
+              <th class="num">金額</th>
+              <th class="num pc">割合</th>
+              <th class="num">件数</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in savingsCategories"
+              :key="row.name"
+              class="ca-row"
+              :class="{ 'is-selected': selectedCategory === row.name }"
+              @click="setSelectedCategory(row.name)"
+            >
+              <td class="ca-name">{{ row.name }}</td>
+              <td class="num savings">{{ formatCurrency(row.totalSavings) }}</td>
+              <td class="num pc">
+                <div class="bar-wrap">
+                  <div class="bar-fill savings-bar" :style="{ width: savingsRatio(row) + '%' }"></div>
+                  <span class="bar-label">{{ savingsRatio(row) }}%</span>
+                </div>
+              </td>
+              <td class="num muted">{{ row.count }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="ca-total">
+              <td>合計</td>
+              <td class="num savings">{{ formatCurrency(savingsTotalAmount) }}</td>
+              <td class="num pc"></td>
+              <td class="num muted">{{ savingsTotalCount }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- 投資セクション -->
+      <div v-if="investmentCategories.length > 0" class="ca-section investment-section">
+        <div class="section-label investment-label">投資</div>
+        <table class="ca-table">
+          <thead>
+            <tr>
+              <th>カテゴリ</th>
+              <th class="num">金額</th>
+              <th class="num pc">割合</th>
+              <th class="num">件数</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in investmentCategories"
+              :key="row.name"
+              class="ca-row"
+              :class="{ 'is-selected': selectedCategory === row.name }"
+              @click="setSelectedCategory(row.name)"
+            >
+              <td class="ca-name">{{ row.name }}</td>
+              <td class="num investment">{{ formatCurrency(row.totalInvestment) }}</td>
+              <td class="num pc">
+                <div class="bar-wrap">
+                  <div class="bar-fill investment-bar" :style="{ width: investmentRatio(row) + '%' }"></div>
+                  <span class="bar-label">{{ investmentRatio(row) }}%</span>
+                </div>
+              </td>
+              <td class="num muted">{{ row.count }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="ca-total">
+              <td>合計</td>
+              <td class="num investment">{{ formatCurrency(investmentTotalAmount) }}</td>
+              <td class="num pc"></td>
+              <td class="num muted">{{ investmentTotalCount }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
       <!-- 収入セクション -->
       <div v-if="incomeCategories.length > 0" class="ca-section income-section">
         <div class="section-label income-label">収入</div>
@@ -62,6 +146,7 @@
             <tr>
               <th>カテゴリ</th>
               <th class="num">金額</th>
+              <th class="num pc">割合</th>
               <th class="num">件数</th>
             </tr>
           </thead>
@@ -75,6 +160,12 @@
             >
               <td class="ca-name">{{ row.name }}</td>
               <td class="num income">{{ formatCurrency(row.totalIncome) }}</td>
+              <td class="num pc">
+                <div class="bar-wrap">
+                  <div class="bar-fill income-bar" :style="{ width: incomeRatio(row) + '%' }"></div>
+                  <span class="bar-label">{{ incomeRatio(row) }}%</span>
+                </div>
+              </td>
               <td class="num muted">{{ row.count }}</td>
             </tr>
           </tbody>
@@ -82,25 +173,36 @@
             <tr class="ca-total">
               <td>合計</td>
               <td class="num income">{{ formatCurrency(incomeTotalAmount) }}</td>
+              <td class="num pc"></td>
               <td class="num muted">{{ incomeTotalCount }}</td>
             </tr>
           </tfoot>
         </table>
       </div>
-      <!-- 収支サマリー行 -->
+      <!-- 明細サマリー行 -->
       <div class="ca-summary">
         <span class="summary-item">
-          <span class="summary-label">支出合計</span>
+          <span class="summary-label">支出</span>
           <span class="summary-value expense">-¥{{ formatCurrency(expenseTotalAmount) }}</span>
+        </span>
+        <span v-if="savingsTotalAmount > 0" class="summary-sep">／</span>
+        <span v-if="savingsTotalAmount > 0" class="summary-item">
+          <span class="summary-label">貯金</span>
+          <span class="summary-value savings">-¥{{ formatCurrency(savingsTotalAmount) }}</span>
+        </span>
+        <span v-if="investmentTotalAmount > 0" class="summary-sep">／</span>
+        <span v-if="investmentTotalAmount > 0" class="summary-item">
+          <span class="summary-label">投資</span>
+          <span class="summary-value investment">-¥{{ formatCurrency(investmentTotalAmount) }}</span>
         </span>
         <span class="summary-sep">／</span>
         <span class="summary-item">
-          <span class="summary-label">収入合計</span>
+          <span class="summary-label">収入</span>
           <span class="summary-value income">+¥{{ formatCurrency(incomeTotalAmount) }}</span>
         </span>
         <span class="summary-sep">／</span>
         <span class="summary-item">
-          <span class="summary-label">収支</span>
+          <span class="summary-label">純残高</span>
           <span class="summary-value" :class="netAmount >= 0 ? 'positive' : 'negative'">
             {{ netAmount >= 0 ? '+' : '' }}¥{{ formatCurrency(netAmount) }}
           </span>
@@ -117,7 +219,7 @@
             <th>小カテゴリ</th>
             <th class="num">支出</th>
             <th class="num">収入</th>
-            <th class="num">収支</th>
+            <th class="num">明細</th>
             <th class="num">件数</th>
           </tr>
         </thead>
@@ -174,16 +276,45 @@ const incomeCategories = computed(() =>
   categoryStats.value.filter(r => r.totalIncome > 0)
     .sort((a, b) => b.totalIncome - a.totalIncome)
 );
+const savingsCategories = computed(() =>
+  categoryStats.value.filter(r => r.totalSavings > 0)
+    .sort((a, b) => b.totalSavings - a.totalSavings)
+);
+const investmentCategories = computed(() =>
+  categoryStats.value.filter(r => r.totalInvestment > 0)
+    .sort((a, b) => b.totalInvestment - a.totalInvestment)
+);
 
-const expenseTotalAmount = computed(() => expenseCategories.value.reduce((s, r) => s + r.totalExpense, 0));
-const incomeTotalAmount  = computed(() => incomeCategories.value.reduce((s, r) => s + r.totalIncome, 0));
-const expenseTotalCount  = computed(() => expenseCategories.value.reduce((s, r) => s + r.count, 0));
-const incomeTotalCount   = computed(() => incomeCategories.value.reduce((s, r) => s + r.count, 0));
-const netAmount          = computed(() => incomeTotalAmount.value - expenseTotalAmount.value);
+const expenseTotalAmount    = computed(() => expenseCategories.value.reduce((s, r) => s + r.totalExpense, 0));
+const incomeTotalAmount     = computed(() => incomeCategories.value.reduce((s, r) => s + r.totalIncome, 0));
+const savingsTotalAmount    = computed(() => savingsCategories.value.reduce((s, r) => s + r.totalSavings, 0));
+const investmentTotalAmount = computed(() => investmentCategories.value.reduce((s, r) => s + r.totalInvestment, 0));
+const expenseTotalCount     = computed(() => expenseCategories.value.reduce((s, r) => s + r.count, 0));
+const incomeTotalCount      = computed(() => incomeCategories.value.reduce((s, r) => s + r.count, 0));
+const savingsTotalCount     = computed(() => savingsCategories.value.reduce((s, r) => s + r.count, 0));
+const investmentTotalCount  = computed(() => investmentCategories.value.reduce((s, r) => s + r.count, 0));
+const netAmount             = computed(() =>
+  incomeTotalAmount.value - expenseTotalAmount.value - savingsTotalAmount.value - investmentTotalAmount.value
+);
 
 const expenseRatio = (row) => {
   if (!expenseTotalAmount.value) return 0;
   return Math.round((row.totalExpense / expenseTotalAmount.value) * 100);
+};
+
+const savingsRatio = (row) => {
+  if (!savingsTotalAmount.value) return 0;
+  return Math.round((row.totalSavings / savingsTotalAmount.value) * 100);
+};
+
+const investmentRatio = (row) => {
+  if (!investmentTotalAmount.value) return 0;
+  return Math.round((row.totalInvestment / investmentTotalAmount.value) * 100);
+};
+
+const incomeRatio = (row) => {
+  if (!incomeTotalAmount.value) return 0;
+  return Math.round((row.totalIncome / incomeTotalAmount.value) * 100);
 };
 
 const clearCategory = () => setSelectedCategory(selectedCategory.value);
@@ -242,7 +373,14 @@ const formatDate = (dateStr) => {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  table-layout: fixed;
 }
+.ca-table th:first-child,
+.ca-table td:first-child { width: auto; }
+.ca-table th.num:not(.pc),
+.ca-table td.num:not(.pc) { width: 90px; }
+.ca-table th.pc,
+.ca-table td.pc { width: 90px; }
 .ca-table th {
   text-align: left;
   padding: 8px 12px;
@@ -276,8 +414,10 @@ const formatDate = (dateStr) => {
   text-overflow: ellipsis;
 }
 
-.expense { color: var(--danger-color); }
-.income  { color: var(--success-color); }
+.expense    { color: var(--danger-color); }
+.income     { color: var(--success-color); }
+.savings    { color: #eab308; }
+.investment { color: #3b82f6; }
 .positive { color: var(--success-color); font-weight: 600; }
 .negative { color: var(--danger-color);  font-weight: 600; }
 .muted   { color: var(--text-faded); }
@@ -367,8 +507,25 @@ const formatDate = (dateStr) => {
   color: var(--success-color);
   background: var(--color-win-bg);
 }
+.savings-label {
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.08);
+}
+.investment-label {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
 
-.expense-bar { background: var(--danger-color); }
+.savings-section,
+.investment-section {
+  margin-top: 12px;
+  border-top: 2px solid var(--border-subtle);
+}
+
+.expense-bar    { background: var(--danger-color); }
+.income-bar     { background: var(--success-color); }
+.savings-bar    { background: #eab308; }
+.investment-bar { background: #3b82f6; }
 
 .sub-section {
   border-top: 1px solid var(--border-subtle);

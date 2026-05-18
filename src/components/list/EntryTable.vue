@@ -73,7 +73,12 @@
               </label>
               <div class="entry-main">
                 <span class="entry-store">
-                  <span class="entry-type-badge" :class="entry.type === '収入' ? 'badge-income' : 'badge-expense'">{{ entry.type }}</span>
+                  <span class="entry-type-badge" :class="{
+                    'badge-income':     entry.type === '収入',
+                    'badge-savings':    entry.type === '貯金',
+                    'badge-investment': entry.type === '投資',
+                    'badge-expense':    entry.type === '支出',
+                  }">{{ entry.type }}</span>
                   {{ entry.category }}
                 </span>
                 <span class="entry-machine">
@@ -82,7 +87,12 @@
                 </span>
               </div>
               <div class="entry-numbers">
-                <span class="entry-profit" :class="entry.type === '収入' ? 'positive' : 'negative'">
+                <span class="entry-profit" :class="{
+                  'positive':   entry.type === '収入',
+                  'negative':   entry.type === '支出',
+                  'savings':    entry.type === '貯金',
+                  'investment': entry.type === '投資',
+                }">
                   {{ entry.type === '収入' ? '+' : '-' }}{{ formatCurrency(entry.amount) }}
                 </span>
               </div>
@@ -224,9 +234,9 @@ const confirmBulkDelete = () => {
 };
 
 // ---- 合計 ----
-const totalIncome = computed(() => props.entries.filter(e => e.type === '収入').reduce((s, e) => s + (e.amount || 0), 0));
-const totalExpense = computed(() => props.entries.filter(e => e.type === '支出').reduce((s, e) => s + (e.amount || 0), 0));
-const totalNet = computed(() => totalIncome.value - totalExpense.value);
+const totalIncome  = computed(() => props.entries.filter(e => e.type === '収入').reduce((s, e) => s + (e.amount || 0), 0));
+const totalExpense = computed(() => props.entries.filter(e => e.type !== '収入').reduce((s, e) => s + (e.amount || 0), 0));
+const totalNet     = computed(() => totalIncome.value - totalExpense.value);
 
 // ---- ユーティリティ ----
 const getProfitClass = (profit) => {
@@ -430,8 +440,10 @@ const confirmDelete = (entry) => {
   font-weight: 600;
   flex-shrink: 0;
 }
-.badge-expense { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-.badge-income  { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+.badge-expense     { background: rgba(239, 68, 68, 0.2);  color: #ef4444; }
+.badge-income      { background: rgba(34, 197, 94, 0.2);  color: #22c55e; }
+.badge-savings     { background: rgba(234, 179, 8, 0.2);  color: #eab308; }
+.badge-investment  { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
 .entry-machine {
   font-size: 0.78rem;
   color: var(--text-sub);
@@ -501,9 +513,11 @@ const confirmDelete = (entry) => {
 }
 
 /* ---- カラー ---- */
-.positive { color: var(--success-color); }
-.negative { color: var(--danger-color); }
-.zero     { color: var(--text-sub); }
+.positive   { color: var(--success-color); }
+.negative   { color: var(--danger-color); }
+.zero       { color: var(--text-sub); }
+.savings    { color: #eab308; }
+.investment { color: #3b82f6; }
 
 /* ---- アクションボタン ---- */
 .btn-icon {

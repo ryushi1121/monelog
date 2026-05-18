@@ -1,6 +1,6 @@
 <template>
   <div class="quick-stats card">
-    <h3 class="card-title">{{ title || '収支サマリー' }}</h3>
+    <h3 class="card-title">{{ title || '明細サマリー' }}</h3>
     <div class="stats-grid">
       <div class="stat-item">
         <div class="stat-label">記録件数</div>
@@ -28,7 +28,7 @@ import { formatCurrency } from '../../utils/formatters';
 
 const props = defineProps({
   entries: { type: Array, required: true },
-  title: { type: String, default: '収支サマリー' },
+  title: { type: String, default: '明細サマリー' },
 });
 
 const count = computed(() => props.entries.length);

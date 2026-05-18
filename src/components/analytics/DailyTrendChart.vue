@@ -1,6 +1,6 @@
 <template>
   <div class="analytics-card card mb-4">
-    <h3>{{ trendChartData ? trendChartData.title : '収支推移' }}</h3>
+    <h3>{{ trendChartData ? trendChartData.title : '明細推移' }}</h3>
     <div class="chart-wrapper">
       <VueChart v-if="trendChartData" type="bar" :data="chartData" :options="chartOptions" />
       <div v-else class="empty-state text-muted text-center py-4">データがありません</div>
@@ -49,7 +49,7 @@ const chartData = computed(() => {
     datasets: [
       {
         type: 'bar',
-        label: '収支',
+        label: '明細',
         data: data.nets,
         backgroundColor: data.nets.map(v =>
           v === null ? 'transparent' : v >= 0 ? 'rgba(34,197,94,0.7)' : 'rgba(239,68,68,0.7)'
@@ -111,7 +111,7 @@ const chartOptions = computed(() => {
           ticks: {
             color: cc.value.textSub,
             font: { size: 11 },
-            callback: v => `${Math.round(v / 1000)}k`
+            callback: v => `${Math.round(v / 1000)}千`
           },
           grid: { color: cc.value.grid }
         },
@@ -123,7 +123,7 @@ const chartOptions = computed(() => {
           ticks: {
             color: '#3b82f6',
             font: { size: 11 },
-            callback: v => `${Math.round(v / 1000)}k`
+            callback: v => `${Math.round(v / 1000)}千`
           },
           grid: { drawOnChartArea: false }
         }

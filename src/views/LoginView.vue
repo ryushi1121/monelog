@@ -24,7 +24,7 @@
         <div class="login-features">
           <div class="feature-item">
             <i class="feature-icon fa-solid fa-receipt"></i>
-            <span class="feature-text">かんたん収支登録</span>
+            <span class="feature-text">かんたん明細登録</span>
           </div>
           <div class="feature-item">
             <i class="feature-icon fa-solid fa-chart-pie"></i>

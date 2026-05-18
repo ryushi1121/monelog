@@ -2,14 +2,14 @@
   <div class="analytics-view">
     <div class="page-header">
       <h1 class="page-title">集計</h1>
-      <p class="page-subtitle">期間・カテゴリ別の収支確認</p>
+      <p class="page-subtitle">期間・カテゴリ別の明細確認</p>
     </div>
 
     <PeriodSelector />
 
-    <!-- 期間累積収支サマリー -->
+    <!-- 期間累積明細サマリー -->
     <div class="period-summary card mb-4">
-      <span class="summary-label">{{ periodLabel }}の収支合計</span>
+      <span class="summary-label">{{ periodLabel }}の明細合計</span>
       <span class="summary-amount" :class="profitClass">
         {{ formattedProfit }}円
       </span>

@@ -70,7 +70,7 @@ const chartOptions = computed(() => ({
   scales: {
     y: {
       grid: { color: cc.value.grid },
-      ticks: { color: cc.value.textSub, callback: v => `${Math.round(v / 1000)}k` }
+      ticks: { color: cc.value.textSub, callback: v => `${Math.round(v / 1000)}千` }
     },
     x: {
       grid: { display: false },

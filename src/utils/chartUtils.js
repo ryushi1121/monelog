@@ -1,5 +1,5 @@
 /**
- * 棒グラフ（収支）と折れ線（累積収支）の両軸のゼロ位置を揃える。
+ * 棒グラフ（明細）と折れ線（累積明細）の両軸のゼロ位置を揃える。
  * 棒グラフの見た目を守るため、左軸（棒）は自然な範囲のまま固定し、
  * 右軸（折れ線）側だけをゼロ位置に合わせて拡張する。
  */
@@ -45,7 +45,7 @@ export function computeSyncedBounds(vals1, vals2) {
   };
 }
 
-/** アノテーション: 累積収支軸（yRight）のゼロ基準線 */
+/** アノテーション: 累積明細軸（yRight）のゼロ基準線 */
 export const zeroLineAnnotation = {
   annotation: {
     annotations: {
