@@ -1,14 +1,14 @@
 <template>
   <div class="settings-view">
     <div class="page-header">
-      <h1 class="page-title">設定</h1>
-      <p class="page-subtitle">アプリの設定とアカウント管理</p>
+      <h1 class="page-title">{{ t('settings.title') }}</h1>
+      <p class="page-subtitle">{{ t('settings.subtitle') }}</p>
     </div>
 
     <div class="settings-grid">
-      <!-- アカウント情報 -->
+      <!-- Google アカウント -->
       <div class="card settings-card">
-        <h3>Google アカウント</h3>
+        <h3>{{ t('settings.accountTitle') }}</h3>
         <div v-if="user" class="account-info">
           <img :src="user.picture" alt="Profile" class="profile-pic" v-if="user.picture" />
           <div class="account-details">
@@ -18,70 +18,92 @@
         </div>
         <div class="settings-actions mt-4">
           <button class="btn btn-danger" @click="handleLogout">
-            <span class="icon">🚪</span> ログアウト
+            <span class="icon">🚪</span> {{ t('settings.logout') }}
           </button>
         </div>
       </div>
 
-      <!-- カスタムカテゴリ管理 -->
+      <!-- 言語設定 -->
       <div class="card settings-card">
-        <h3>カスタムカテゴリ</h3>
-        <p class="text-muted text-sm mb-4">
-          システム固定のカテゴリに追加で独自カテゴリを登録できます。
-        </p>
+        <h3>{{ t('settings.langTitle') }}</h3>
+        <div class="form-group">
+          <label class="form-label text-sm">{{ t('settings.langLabel') }}</label>
+          <div class="lang-options">
+            <button
+              class="lang-btn"
+              :class="{ active: currentLocale === 'ja' }"
+              @click="changeLocale('ja')"
+            >
+              🇯🇵 {{ t('settings.langJa') }}
+            </button>
+            <button
+              class="lang-btn"
+              :class="{ active: currentLocale === 'en' }"
+              @click="changeLocale('en')"
+            >
+              🇺🇸 {{ t('settings.langEn') }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- カスタムカテゴリ -->
+      <div class="card settings-card">
+        <h3>{{ t('settings.customCatTitle') }}</h3>
+        <p class="text-muted text-sm mb-4">{{ t('settings.customCatDesc') }}</p>
 
         <div class="category-form mb-4">
           <div class="form-group">
-            <label class="form-label text-sm">種別</label>
+            <label class="form-label text-sm">{{ t('settings.catType') }}</label>
             <select v-model="newType" class="form-control">
-              <option value="支出">支出</option>
-              <option value="収入">収入</option>
+              <option value="支出">{{ t('types.expense') }}</option>
+              <option value="収入">{{ t('types.income') }}</option>
             </select>
           </div>
           <div class="form-group mt-2">
-            <label class="form-label text-sm">カテゴリ名</label>
-            <input type="text" v-model="newCategory" class="form-control" placeholder="例: ペット費" />
+            <label class="form-label text-sm">{{ t('settings.catName') }}</label>
+            <input type="text" v-model="newCategory" class="form-control" :placeholder="t('entry.categoryPlaceholder')" />
           </div>
           <div class="form-group mt-2">
-            <label class="form-label text-sm">小カテゴリ名（任意）</label>
-            <input type="text" v-model="newSubcategory" class="form-control" placeholder="例: フード代" />
+            <label class="form-label text-sm">{{ t('settings.catSubname') }}</label>
+            <input type="text" v-model="newSubcategory" class="form-control" :placeholder="t('entry.subcategoryPlaceholder')" />
           </div>
           <button
             class="btn btn-primary mt-3 w-100"
             @click="handleAddCustom"
             :disabled="!newCategory"
           >
-            追加する
+            {{ t('settings.catAdd') }}
           </button>
         </div>
 
         <div class="custom-list-container">
-          <h4 class="text-sm mb-2">登録済みカスタムカテゴリ</h4>
+          <h4 class="text-sm mb-2">{{ t('settings.catRegistered') }}</h4>
           <div v-for="(cats, type) in customCategories" :key="type">
             <div v-for="(subs, cat) in cats" :key="cat" class="custom-category-item">
               <div class="custom-cat-info">
-                <span class="custom-type-badge" :class="type === '収入' ? 'badge-income' : 'badge-expense'">{{ type }}</span>
+                <span class="custom-type-badge" :class="type === '収入' ? 'badge-income' : 'badge-expense'">
+                  {{ type === '収入' ? t('types.income') : t('types.expense') }}
+                </span>
                 <span class="custom-cat-name">{{ cat }}</span>
                 <span v-if="subs.length > 0" class="custom-subs">{{ subs.join('、') }}</span>
               </div>
             </div>
           </div>
           <p v-if="Object.values(customCategories).every(t => Object.keys(t).length === 0)" class="text-muted text-sm text-center py-2">
-            カスタムカテゴリはありません
+            {{ t('settings.catEmpty') }}
           </p>
         </div>
       </div>
 
       <!-- データ管理 -->
       <div class="card settings-card">
-        <h3>データ管理</h3>
-        <p class="text-muted text-sm mb-4">
-          データはすべてGoogleカレンダー（「MoneLog」プレフィックス付き）に保存されています。
-        </p>
+        <h3>{{ t('settings.dataTitle') }}</h3>
+        <p class="text-muted text-sm mb-4">{{ t('settings.dataDesc') }}</p>
         <div class="settings-actions">
           <button class="btn btn-primary" @click="handleSync" :disabled="isLoading">
             <span class="icon">🔄</span>
-            {{ isLoading ? '同期中...' : '手動で同期する' }}
+            {{ isLoading ? t('settings.syncing') : t('settings.sync') }}
           </button>
         </div>
         <p v-if="syncMessage" class="sync-message mt-2 text-sm text-success">
@@ -91,12 +113,12 @@
 
       <!-- アプリ情報 -->
       <div class="card settings-card">
-        <h3>アプリ情報</h3>
+        <h3>{{ t('settings.appInfoTitle') }}</h3>
         <ul class="app-info-list">
-          <li><strong>アプリ名:</strong> MoneLog</li>
-          <li><strong>バージョン:</strong> 1.0.0</li>
-          <li><strong>開発環境:</strong> Vue 3 + Vite</li>
-          <li><strong>PWA:</strong> 対応済み</li>
+          <li><strong>{{ t('settings.appName') }}:</strong> MoneLog</li>
+          <li><strong>{{ t('settings.appVersion') }}:</strong> 1.0.0</li>
+          <li><strong>{{ t('settings.appEnv') }}:</strong> Vue 3 + Vite</li>
+          <li><strong>{{ t('settings.appPWA') }}:</strong> 対応済み</li>
         </ul>
       </div>
     </div>
@@ -104,21 +126,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables/useAuth';
 import { useEntries } from '@/composables/useEntries';
 import { useCategorySettings } from '@/composables/useStoreSettings';
+import { useLocale } from '@/composables/useLocale';
 
 const router = useRouter();
+const { t } = useI18n();
 const { user, logout } = useAuth();
 const { loadEntries, clearEntries, isLoading } = useEntries();
 const { customCategories, addCustomCategory, addCustomSubcategory } = useCategorySettings();
+const { locale, setLocale } = useLocale();
+
+const currentLocale = computed(() => locale.value);
 
 const syncMessage = ref('');
 const newType = ref('支出');
 const newCategory = ref('');
 const newSubcategory = ref('');
+
+const changeLocale = (lang) => {
+  setLocale(lang);
+};
 
 const handleAddCustom = () => {
   if (!newCategory.value) return;
@@ -129,7 +161,7 @@ const handleAddCustom = () => {
 };
 
 const handleLogout = () => {
-  if (confirm('ログアウトしますか？')) {
+  if (confirm(t('settings.logoutConfirm'))) {
     logout();
     clearEntries();
     router.push('/login');
@@ -140,10 +172,10 @@ const handleSync = async () => {
   syncMessage.value = '';
   try {
     await loadEntries();
-    syncMessage.value = '同期が完了しました。';
+    syncMessage.value = t('settings.syncSuccess');
     setTimeout(() => { syncMessage.value = ''; }, 3000);
   } catch {
-    alert('同期に失敗しました。');
+    alert(t('settings.syncError'));
   }
 };
 </script>
@@ -184,6 +216,36 @@ const handleSync = async () => {
 
 .account-name { font-size: 1.1rem; font-weight: bold; color: var(--text-primary); }
 .account-email { font-size: 0.9rem; color: var(--text-secondary); }
+
+.lang-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.lang-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--overlay-1);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.lang-btn:hover {
+  border-color: var(--accent-primary);
+  background: rgba(var(--accent-primary-rgb), 0.08);
+}
+
+.lang-btn.active {
+  border-color: var(--accent-primary);
+  background: rgba(var(--accent-primary-rgb), 0.12);
+  font-weight: 600;
+}
 
 .category-form {
   background-color: var(--overlay-1);

@@ -1,19 +1,19 @@
 <template>
   <div class="recent-history card">
     <div class="card-header">
-      <h3 class="card-title">直近の履歴</h3>
-      <router-link to="/list" class="view-all">すべて見る</router-link>
+      <h3 class="card-title">{{ t('recentHistory.title') }}</h3>
+      <router-link to="/list" class="view-all">{{ t('recentHistory.viewAll') }}</router-link>
     </div>
 
     <div class="history-list" v-if="entries.length > 0">
       <div v-for="entry in recentEntries" :key="entry.id" class="history-item">
         <div class="item-date">
           <span class="day">{{ formatDateDisplay(entry.date) }}</span>
-          <span class="dow">{{ entry.dayOfWeek }}</span>
+          <span class="dow">{{ t(`weekdays.${entry.dayOfWeek}`, entry.dayOfWeek) }}</span>
         </div>
         <div class="item-details">
-          <div class="item-category">{{ entry.category }}</div>
-          <div class="item-subcategory" v-if="entry.subcategory">{{ entry.subcategory }}</div>
+          <div class="item-category">{{ t(`sysCategories.${entry.category}`, entry.category) }}</div>
+          <div class="item-subcategory" v-if="entry.subcategory">{{ t(`sysCategories.${entry.subcategory}`, entry.subcategory) }}</div>
         </div>
         <div class="item-amount" :class="amountClass(entry.type)">
           {{ entry.type === '収入' ? '+' : '-' }}{{ formatCurrency(entry.amount) }}
@@ -22,14 +22,15 @@
     </div>
 
     <div v-else class="empty-state">
-      <p>履歴がありません</p>
-      <router-link to="/entry" class="btn btn-outline">明細を登録する</router-link>
+      <p>{{ t('recentHistory.empty') }}</p>
+      <router-link to="/entry" class="btn btn-outline">{{ t('recentHistory.registerBtn') }}</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { formatDateDisplay } from '../../utils/dateUtils';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -37,6 +38,8 @@ const props = defineProps({
   entries: { type: Array, required: true },
   limit: { type: Number, default: 5 },
 });
+
+const { t } = useI18n();
 
 const recentEntries = computed(() => props.entries.slice(0, props.limit));
 

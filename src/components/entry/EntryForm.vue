@@ -2,75 +2,70 @@
   <div class="entry-form-container">
     <form @submit.prevent="submitForm" class="entry-form">
 
-      <!-- 種別トグル -->
       <div class="type-toggle">
         <button
           type="button"
           :class="['toggle-btn', formData.type === '支出' ? 'active expense' : '']"
           @click="setType('支出')"
-        >支出</button>
+        >{{ t('types.expense') }}</button>
         <button
           type="button"
           :class="['toggle-btn', formData.type === '収入' ? 'active income' : '']"
           @click="setType('収入')"
-        >収入</button>
+        >{{ t('types.income') }}</button>
         <button
           type="button"
           :class="['toggle-btn', formData.type === '貯金' ? 'active savings' : '']"
           @click="setType('貯金')"
-        >貯金</button>
+        >{{ t('types.savings') }}</button>
         <button
           type="button"
           :class="['toggle-btn', formData.type === '投資' ? 'active investment' : '']"
           @click="setType('投資')"
-        >投資</button>
+        >{{ t('types.investment') }}</button>
       </div>
 
-      <!-- 日付 -->
       <div class="form-group">
-        <label for="date" class="form-label">日付</label>
+        <label for="date" class="form-label">{{ t('entry.date') }}</label>
         <input id="date" type="date" v-model="formData.date" class="form-control" required />
       </div>
 
-      <!-- カテゴリ -->
       <div class="form-group">
-        <label for="category" class="form-label">カテゴリ</label>
+        <label for="category" class="form-label">{{ t('entry.category') }}</label>
         <div class="input-with-list">
           <input
             id="category"
             type="text"
             v-model="formData.category"
             class="form-control"
-            placeholder="例: 食費"
+            :placeholder="t('entry.categoryPlaceholder')"
             list="category-list"
             required
             @change="onCategoryChange"
           />
           <datalist id="category-list">
-            <option v-for="cat in categoryOptions" :key="cat" :value="cat" />
+            <option v-for="cat in categoryOptions" :key="cat" :value="cat" :label="t(`sysCategories.${cat}`, cat)" />
           </datalist>
         </div>
       </div>
 
-      <!-- 小カテゴリ -->
       <div class="form-group">
-        <label for="subcategory" class="form-label">小カテゴリ（任意）</label>
+        <label for="subcategory" class="form-label">{{ t('entry.subcategory') }}</label>
         <input
           id="subcategory"
           type="text"
           v-model="formData.subcategory"
           class="form-control"
-          placeholder="例: 外食"
+          :placeholder="t('entry.subcategoryPlaceholder')"
           list="subcategory-list"
         />
         <datalist id="subcategory-list">
-          <option v-for="sub in subcategoryOptions" :key="sub" :value="sub" />
+          <option v-for="sub in subcategoryOptions" :key="sub" :value="sub" :label="t(`sysCategories.${sub}`, sub)" />
         </datalist>
       </div>
 
-      <!-- 金額 -->
       <div class="form-group">
-        <label for="amount" class="form-label">金額（円）</label>
+        <label for="amount" class="form-label">{{ t('entry.amount') }}</label>
         <input
           id="amount"
           type="number"
@@ -89,14 +84,13 @@
         />
       </div>
 
-      <!-- メモ -->
       <div class="form-group">
-        <label for="memo" class="form-label">メモ（任意）</label>
+        <label for="memo" class="form-label">{{ t('entry.memo') }}</label>
         <textarea
           id="memo"
           v-model="formData.memo"
           rows="3"
-          placeholder="自由入力"
+          :placeholder="t('entry.memoPlaceholder')"
           class="form-control"
         ></textarea>
       </div>
@@ -105,8 +99,8 @@
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary btn-submit" :disabled="isLoading">
-          <span v-if="isLoading">保存中...</span>
-          <span v-else>{{ isEditMode ? '更新する' : '登録する' }}</span>
+          <span v-if="isLoading">{{ t('entry.saving') }}</span>
+          <span v-else>{{ isEditMode ? t('entry.update') : t('entry.register') }}</span>
         </button>
         <button
           v-if="isEditMode"
@@ -115,7 +109,7 @@
           :disabled="isLoading"
           @click="handleDelete"
         >
-          <i class="fa-solid fa-trash"></i> この記録を削除する
+          <i class="fa-solid fa-trash"></i> {{ t('entry.delete') }}
         </button>
       </div>
     </form>
@@ -125,6 +119,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useEntries } from '../../composables/useEntries';
 import { useCategorySettings } from '../../composables/useStoreSettings';
 import { formatDateForAPI } from '../../utils/dateUtils';
@@ -134,6 +129,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const { t } = useI18n();
 const { entries, addEntry, editEntry, removeEntry, isLoading, error } = useEntries();
 const { getCategoriesForType, getSubcategoriesFor, addCustomSubcategory, addCustomCategory } = useCategorySettings();
 
@@ -148,13 +144,11 @@ const formData = ref({
 
 const isEditMode = computed(() => !!props.entryId);
 
-// 選択中の種別に応じたカテゴリ一覧（システム固定 + カスタム）
 const categoryOptions = computed(() => {
   const cats = getCategoriesForType(formData.value.type);
   return Object.keys(cats);
 });
 
-// 選択中カテゴリの小カテゴリ一覧
 const subcategoryOptions = computed(() => {
   if (!formData.value.category) return [];
   return getSubcategoriesFor(formData.value.type, formData.value.category);
@@ -193,18 +187,17 @@ watch(() => props.entryId, initForm);
 
 const handleDelete = async () => {
   const entry = entries.value.find(e => e.id === props.entryId);
-  const label = entry ? `${entry.date}の「${entry.category}」` : 'この記録';
-  if (!window.confirm(`${label}を削除しますか？\n（この操作は元に戻せません）`)) return;
+  const label = entry ? `${entry.date}の「${entry.category}」` : t('entry.delete');
+  if (!window.confirm(t('entry.deleteConfirm', { label }))) return;
   try {
     await removeEntry(props.entryId);
     router.push({ name: 'List' });
   } catch (err) {
-    alert('削除に失敗しました: ' + err.message);
+    alert(t('entry.deleteError', { msg: err.message }));
   }
 };
 
 const submitForm = async () => {
-  // 自由入力のカテゴリ・小カテゴリはカスタムに保存
   const type = formData.value.type;
   const category = formData.value.category;
   const subcategory = formData.value.subcategory;
@@ -253,7 +246,6 @@ const submitForm = async () => {
   gap: 1.5rem;
 }
 
-/* 収入/支出トグル */
 .type-toggle {
   display: flex;
   gap: 0;
@@ -274,25 +266,10 @@ const submitForm = async () => {
   transition: all 0.2s ease;
 }
 
-.toggle-btn.active.expense {
-  background: var(--danger-color, #ef4444);
-  color: #fff;
-}
-
-.toggle-btn.active.income {
-  background: var(--success-color, #22c55e);
-  color: #fff;
-}
-
-.toggle-btn.active.savings {
-  background: #eab308;
-  color: #fff;
-}
-
-.toggle-btn.active.investment {
-  background: #3b82f6;
-  color: #fff;
-}
+.toggle-btn.active.expense    { background: var(--danger-color, #ef4444); color: #fff; }
+.toggle-btn.active.income     { background: var(--success-color, #22c55e); color: #fff; }
+.toggle-btn.active.savings    { background: #eab308; color: #fff; }
+.toggle-btn.active.investment { background: #3b82f6; color: #fff; }
 
 .form-group {
   display: flex;
@@ -328,9 +305,7 @@ const submitForm = async () => {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
-textarea.form-control {
-  resize: vertical;
-}
+textarea.form-control { resize: vertical; }
 
 .amount-input {
   font-family: 'Inter', sans-serif;
@@ -338,25 +313,10 @@ textarea.form-control {
   font-size: 1.2rem;
 }
 
-.expense-input:focus {
-  border-color: var(--danger-color, #ef4444);
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
-}
-
-.income-input:focus {
-  border-color: var(--success-color, #22c55e);
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
-}
-
-.savings-input:focus {
-  border-color: #eab308;
-  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
-}
-
-.investment-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
+.expense-input:focus    { border-color: var(--danger-color, #ef4444); box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
+.income-input:focus     { border-color: var(--success-color, #22c55e); box-shadow: 0 0 0 2px rgba(34,197,94,0.2); }
+.savings-input:focus    { border-color: #eab308; box-shadow: 0 0 0 2px rgba(234,179,8,0.2); }
+.investment-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
 
 .error-message {
   color: var(--danger-color, #ef4444);

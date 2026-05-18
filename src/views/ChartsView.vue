@@ -1,19 +1,18 @@
 <template>
   <div class="charts-view">
     <div class="page-header">
-      <h1 class="page-title">分析</h1>
-      <p class="page-subtitle">明細の傾向・パターンを読む</p>
+      <h1 class="page-title">{{ t('charts.title') }}</h1>
+      <p class="page-subtitle">{{ t('charts.subtitle') }}</p>
     </div>
 
     <PeriodSelector />
 
-    <!-- 期間累積明細サマリー -->
     <div class="period-summary card mb-4">
-      <span class="summary-label">{{ periodLabel }}の明細合計</span>
+      <span class="summary-label">{{ periodLabel }}</span>
       <span class="summary-amount" :class="profitClass">
         {{ formattedProfit }}円
       </span>
-      <span class="summary-count">{{ summaryStats.count }}件</span>
+      <span class="summary-count">{{ summaryStats.count }}{{ t('quickStats.unitCount') }}</span>
     </div>
 
     <div class="charts-grid">
@@ -26,6 +25,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEntries } from '@/composables/useEntries';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { formatProfit } from '@/utils/formatters';
@@ -34,6 +34,7 @@ import TrendChart from '@/components/charts/TrendChart.vue';
 import WeekdayChart from '@/components/charts/WeekdayChart.vue';
 import CategoryPieChart from '@/components/charts/CategoryPieChart.vue';
 
+const { t, locale } = useI18n();
 const { isLoaded, loadEntries } = useEntries();
 const { selectedCategory, summaryStats, periodType, periodValue } = useAnalytics();
 
@@ -45,11 +46,13 @@ const periodLabel = computed(() => {
   let label = '';
   if (periodType.value === 'month' && periodValue.value) {
     const [y, m] = periodValue.value.split('-');
-    label = `${y}年${parseInt(m)}月`;
+    label = locale.value === 'en'
+      ? new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+      : `${y}年${parseInt(m)}月`;
   } else if (periodType.value === 'year' && periodValue.value) {
-    label = `${periodValue.value}年`;
+    label = locale.value === 'en' ? periodValue.value : `${periodValue.value}年`;
   } else {
-    label = '全期間';
+    label = t('period.all');
   }
   return selectedCategory.value ? `${label} / ${selectedCategory.value}` : label;
 });

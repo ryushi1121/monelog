@@ -1,19 +1,18 @@
 <template>
   <div class="analytics-view">
     <div class="page-header">
-      <h1 class="page-title">集計</h1>
-      <p class="page-subtitle">期間・カテゴリ別の明細確認</p>
+      <h1 class="page-title">{{ t('analytics.title') }}</h1>
+      <p class="page-subtitle">{{ t('analytics.subtitle') }}</p>
     </div>
 
     <PeriodSelector />
 
-    <!-- 期間累積明細サマリー -->
     <div class="period-summary card mb-4">
-      <span class="summary-label">{{ periodLabel }}の明細合計</span>
+      <span class="summary-label">{{ periodLabel }}</span>
       <span class="summary-amount" :class="profitClass">
         {{ formattedProfit }}円
       </span>
-      <span class="summary-count">{{ summaryStats.count }}件</span>
+      <span class="summary-count">{{ summaryStats.count }}{{ t('quickStats.unitCount') }}</span>
     </div>
 
     <DailyTrendChart />
@@ -28,6 +27,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEntries } from '@/composables/useEntries';
 import { useAnalytics } from '@/composables/useAnalytics';
 import { formatProfit } from '@/utils/formatters';
@@ -36,6 +36,7 @@ import DailyTrendChart from '@/components/analytics/DailyTrendChart.vue';
 import WeekdayAnalytics from '@/components/analytics/WeekdayAnalytics.vue';
 import CategoryAnalytics from '@/components/analytics/CategoryAnalytics.vue';
 
+const { t, locale } = useI18n();
 const { isLoaded, loadEntries } = useEntries();
 const { summaryStats, periodType, periodValue, selectedCategory } = useAnalytics();
 
@@ -47,13 +48,16 @@ const periodLabel = computed(() => {
   let label = '';
   if (periodType.value === 'month' && periodValue.value) {
     const [y, m] = periodValue.value.split('-');
-    label = `${y}年${parseInt(m)}月`;
+    label = locale.value === 'en'
+      ? new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+      : `${y}年${parseInt(m)}月`;
   } else if (periodType.value === 'year' && periodValue.value) {
-    label = `${periodValue.value}年`;
+    label = locale.value === 'en' ? periodValue.value : `${periodValue.value}年`;
   } else {
-    label = '全期間';
+    label = t('period.all');
   }
-  return selectedCategory.value ? `${label} / ${selectedCategory.value}` : label;
+  const base = selectedCategory.value ? `${label} / ${selectedCategory.value}` : label;
+  return t('analytics.periodTotal', { period: base });
 });
 
 const formattedProfit = computed(() => formatProfit(summaryStats.value.net));

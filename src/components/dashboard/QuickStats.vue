@@ -1,21 +1,21 @@
 <template>
   <div class="quick-stats card">
-    <h3 class="card-title">{{ title || '明細サマリー' }}</h3>
+    <h3 class="card-title">{{ title || t('quickStats.title') }}</h3>
     <div class="stats-grid">
       <div class="stat-item">
-        <div class="stat-label">記録件数</div>
-        <div class="stat-value">{{ count }} <span class="unit">件</span></div>
+        <div class="stat-label">{{ t('quickStats.count') }}</div>
+        <div class="stat-value">{{ count }}<span class="unit">{{ t('quickStats.unitCount') }}</span></div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">記録日数</div>
-        <div class="stat-value">{{ recordDays }} <span class="unit">日</span></div>
+        <div class="stat-label">{{ t('quickStats.days') }}</div>
+        <div class="stat-value">{{ recordDays }}<span class="unit">{{ t('quickStats.unitDays') }}</span></div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">日平均支出</div>
+        <div class="stat-label">{{ t('quickStats.dailyAvg') }}</div>
         <div class="stat-value expense">{{ recordDays > 0 ? formatCurrency(Math.round(totalExpense / recordDays)) : '—' }}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">最大1件支出</div>
+        <div class="stat-label">{{ t('quickStats.maxExpense') }}</div>
         <div class="stat-value expense">{{ maxExpense > 0 ? formatCurrency(maxExpense) : '—' }}</div>
       </div>
     </div>
@@ -24,12 +24,15 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { formatCurrency } from '../../utils/formatters';
 
 const props = defineProps({
   entries: { type: Array, required: true },
-  title: { type: String, default: '明細サマリー' },
+  title: { type: String, default: '' },
 });
+
+const { t } = useI18n();
 
 const count = computed(() => props.entries.length);
 

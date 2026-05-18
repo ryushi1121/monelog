@@ -1,0 +1,192 @@
+{
+  "languageSelect": {
+    "title": "言語を選択してください",
+    "subtitle": "Select your language",
+    "confirm": "確認 / Confirm"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "record": "記録する",
+    "list": "明細一覧",
+    "analytics": "集計",
+    "charts": "分析",
+    "settings": "設定"
+  },
+  "types": {
+    "expense": "支出",
+    "income": "収入",
+    "savings": "貯金",
+    "investment": "投資"
+  },
+  "typeAll": "すべて",
+  "weekdays": {
+    "月": "月",
+    "火": "火",
+    "水": "水",
+    "木": "木",
+    "金": "金",
+    "土": "土",
+    "日": "日"
+  },
+  "period": {
+    "all": "全期間",
+    "year": "年別",
+    "month": "月別"
+  },
+  "common": {
+    "loading": "データを読み込み中...",
+    "retry": "再試行",
+    "noData": "データがありません",
+    "empty": "条件に一致するデータがありません",
+    "reset": "リセット",
+    "total": "合計",
+    "yes": "¥"
+  },
+  "login": {
+    "subtitle": "Googleカレンダーと連携して家計を簡単に記録・分析",
+    "featureEntry": "かんたん明細登録",
+    "featureAnalytics": "カテゴリ別・月別集計",
+    "featureCharts": "グラフで見える化",
+    "loginBtn": "Googleアカウントでログイン",
+    "loggingIn": "ログイン中...",
+    "note": "Googleカレンダーへのアクセス許可が必要です"
+  },
+  "header": {
+    "logout": "ログアウト",
+    "switchToLight": "ライトテーマに切替",
+    "switchToDark": "ダークテーマに切替"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "subtitle": "{period}の状況",
+    "income": "{period}の収入",
+    "expense": "{period}の支出",
+    "savingsInvestment": "{period}の貯金・投資",
+    "net": "{period}の純残高",
+    "recordBtn": "記録する",
+    "monthTab": "月",
+    "yearTab": "年"
+  },
+  "entry": {
+    "title": "記録する",
+    "subtitle": "収入・支出を記録しましょう",
+    "editTitle": "記録を編集",
+    "editSubtitle": "記録内容を修正します",
+    "date": "日付",
+    "category": "カテゴリ",
+    "categoryPlaceholder": "例: 食費",
+    "subcategory": "小カテゴリ（任意）",
+    "subcategoryPlaceholder": "例: 外食",
+    "amount": "金額（円）",
+    "memo": "メモ（任意）",
+    "memoPlaceholder": "自由入力",
+    "saving": "保存中...",
+    "register": "登録する",
+    "update": "更新する",
+    "delete": "この記録を削除する",
+    "deleteConfirm": "{label}を削除しますか？\n（この操作は元に戻せません）",
+    "deleteError": "削除に失敗しました: {msg}"
+  },
+  "list": {
+    "title": "明細一覧",
+    "subtitle": "記録した収入・支出の詳細を確認・管理できます",
+    "calendarView": "カレンダー",
+    "listView": "リスト",
+    "sortDate": "日付",
+    "bulkDelete": "一括削除",
+    "deselect": "選択解除",
+    "selected": "{n}件選択中",
+    "bulkDeleteConfirm": "選択した{n}件を削除しますか？\n（この操作は元に戻せません）",
+    "deleteRowConfirm": "{date}「{category}」の記録を削除しますか？\n（この操作は元に戻せません）",
+    "deleteError": "削除に失敗しました: {msg}",
+    "edit": "編集",
+    "delete": "削除"
+  },
+  "filter": {
+    "type": "種別",
+    "category": "カテゴリ",
+    "allTypes": "すべて",
+    "allCategories": "すべてのカテゴリ"
+  },
+  "analytics": {
+    "title": "集計",
+    "subtitle": "期間・カテゴリ別の明細確認",
+    "periodTotal": "{period}の明細合計",
+    "allTotal": "全期間の明細合計",
+    "categoryTitle": "カテゴリ別集計",
+    "subcategoryTitle": "{category} — 小カテゴリ別",
+    "colCategory": "カテゴリ",
+    "colSubcategory": "小カテゴリ",
+    "colAmount": "金額",
+    "colRatio": "割合",
+    "colCount": "件数",
+    "colExpense": "支出",
+    "colIncome": "収入",
+    "colDetail": "明細",
+    "noCategory": "分類なし",
+    "net": "純残高",
+    "weekdayTitle": "曜日別集計",
+    "colWeekday": "曜日"
+  },
+  "charts": {
+    "title": "分析",
+    "subtitle": "明細の傾向・パターンを読む",
+    "trend": "明細",
+    "cumulative": "残高推移",
+    "expenseCategories": "支出カテゴリ構成",
+    "backToAll": "← 全カテゴリ",
+    "weekdayAvgExpense": "曜日別 平均支出",
+    "avgExpense": "平均支出"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "アプリの設定とアカウント管理",
+    "accountTitle": "Google アカウント",
+    "logout": "ログアウト",
+    "logoutConfirm": "ログアウトしますか？",
+    "customCatTitle": "カスタムカテゴリ",
+    "customCatDesc": "システム固定のカテゴリに追加で独自カテゴリを登録できます。",
+    "catType": "種別",
+    "catName": "カテゴリ名",
+    "catSubname": "小カテゴリ名（任意）",
+    "catAdd": "追加する",
+    "catRegistered": "登録済みカスタムカテゴリ",
+    "catEmpty": "カスタムカテゴリはありません",
+    "dataTitle": "データ管理",
+    "dataDesc": "データはすべてGoogleカレンダー（「MoneLog」プレフィックス付き）に保存されています。",
+    "sync": "手動で同期する",
+    "syncing": "同期中...",
+    "syncSuccess": "同期が完了しました。",
+    "syncError": "同期に失敗しました。",
+    "appInfoTitle": "アプリ情報",
+    "appName": "アプリ名",
+    "appVersion": "バージョン",
+    "appEnv": "開発環境",
+    "appPWA": "PWA",
+    "langTitle": "言語設定",
+    "langLabel": "表示言語",
+    "langJa": "日本語",
+    "langEn": "English"
+  },
+  "quickStats": {
+    "title": "明細サマリー",
+    "count": "記録件数",
+    "days": "記録日数",
+    "dailyAvg": "日平均支出",
+    "maxExpense": "最大1件支出",
+    "unitCount": "件",
+    "unitDays": "日"
+  },
+  "recentHistory": {
+    "title": "直近の履歴",
+    "viewAll": "すべて見る",
+    "empty": "履歴がありません",
+    "registerBtn": "明細を登録する"
+  },
+  "summaryCard": {
+    "income": "収入合計",
+    "expense": "支出合計",
+    "savingsInvestment": "貯金・投資",
+    "net": "純残高"
+  }
+}

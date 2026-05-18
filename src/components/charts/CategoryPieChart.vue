@@ -2,27 +2,27 @@
   <div class="chart-container card mb-4">
     <div class="pie-header">
       <h3>
-        支出カテゴリ構成
-        <span v-if="selectedCategory" class="drilldown-label">— {{ selectedCategory }}</span>
+        {{ t('charts.expenseCategories') }}
+        <span v-if="selectedCategory" class="drilldown-label">— {{ t(`sysCategories.${selectedCategory}`, selectedCategory) }}</span>
       </h3>
       <button v-if="selectedCategory" class="back-btn" @click="clearCategory">
-        ← 全カテゴリ
+        {{ t('charts.backToAll') }}
       </button>
     </div>
     <div class="chart-wrapper" v-if="hasData">
       <Doughnut :data="chartData" :options="chartOptions" />
     </div>
-    <div v-else class="empty-state text-muted text-center py-4">データがありません</div>
+    <div v-else class="empty-state text-muted text-center py-4">{{ t('common.noData') }}</div>
 
     <!-- 小カテゴリ内訳リスト -->
     <div v-if="selectedCategory && rows.length > 0" class="sub-list">
       <table class="sub-table">
         <thead>
           <tr>
-            <th>小カテゴリ</th>
-            <th class="num">金額</th>
-            <th class="num">割合</th>
-            <th class="num">件数</th>
+            <th>{{ t('analytics.colSubcategory') }}</th>
+            <th class="num">{{ t('analytics.colAmount') }}</th>
+            <th class="num">{{ t('analytics.colRatio') }}</th>
+            <th class="num">{{ t('analytics.colCount') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -34,7 +34,7 @@
             >
               <td class="sub-name">
                 <span class="color-dot" :style="{ background: PALETTE[i % PALETTE.length] }"></span>
-                {{ row.name }}
+                {{ t(`sysCategories.${row.name}`, row.name) }}
                 <span class="chevron">{{ selectedSubcategory === row.name ? '▲' : '▶' }}</span>
               </td>
               <td class="num expense">¥{{ row.totalExpense.toLocaleString() }}</td>
@@ -47,7 +47,7 @@
               class="entry-row"
             >
               <td class="entry-date">
-                {{ formatDate(entry.date) }}<span class="entry-dow">{{ entry.dayOfWeek }}</span>
+                {{ formatDate(entry.date) }}<span class="entry-dow">{{ t(`weekdays.${entry.dayOfWeek}`, entry.dayOfWeek) }}</span>
               </td>
               <td class="num entry-amount" :class="entry.type === '収入' ? 'income' : 'expense'">
                 {{ entry.type === '収入' ? '+' : '-' }}¥{{ formatCurrency(entry.amount) }}
@@ -59,7 +59,7 @@
         </tbody>
         <tfoot>
           <tr class="sub-total">
-            <td>合計</td>
+            <td>{{ t('common.total') }}</td>
             <td class="num expense">¥{{ grandSubExpense.toLocaleString() }}</td>
             <td class="num pct">100%</td>
             <td class="num muted">{{ subTotalCount }}</td>
@@ -72,6 +72,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Doughnut } from 'vue-chartjs';
 import { useTheme } from '@/composables/useTheme';
 import {
@@ -87,6 +88,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const { categoryStats, subcategoryStats, selectedCategory, setSelectedCategory, drilldownEntries } = useAnalytics();
 const { theme } = useTheme();
+const { t } = useI18n();
 
 const selectedSubcategory = ref('');
 watch(selectedCategory, () => { selectedSubcategory.value = ''; });
@@ -140,7 +142,7 @@ const cc = computed(() => ({
 }));
 
 const chartData = computed(() => ({
-  labels: rows.value.map(r => r.name),
+  labels: rows.value.map(r => t(`sysCategories.${r.name}`, r.name)),
   datasets: [{
     data: rows.value.map(r => r.totalExpense),
     backgroundColor: rows.value.map((_, i) => PALETTE[i % PALETTE.length]),

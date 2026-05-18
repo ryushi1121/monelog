@@ -2,8 +2,8 @@
   <div class="list-view">
     <div class="page-header">
       <div>
-        <h1 class="page-title">明細一覧</h1>
-        <p class="page-subtitle">記録した収入・支出の詳細を確認・管理できます</p>
+        <h1 class="page-title">{{ t('list.title') }}</h1>
+        <p class="page-subtitle">{{ t('list.subtitle') }}</p>
       </div>
     </div>
 
@@ -15,23 +15,22 @@
 
     <div v-if="isLoading" class="loading-state">
       <div class="spinner"></div>
-      <p>データを読み込み中...</p>
+      <p>{{ t('common.loading') }}</p>
     </div>
-    
+
     <div v-else-if="error" class="error-state">
       <p>{{ error }}</p>
-      <button @click="forceReload" class="btn btn-outline">再試行</button>
+      <button @click="forceReload" class="btn btn-outline">{{ t('common.retry') }}</button>
     </div>
 
     <div v-else class="list-content">
-      <!-- 月別のみ表示切替 + カレンダーナビ -->
       <div v-if="isMonthMode" class="cal-header-row">
         <div class="view-toggle">
           <button :class="{ active: viewMode === 'calendar' }" @click="viewMode = 'calendar'">
-            <i class="fa-solid fa-calendar-days"></i> カレンダー
+            <i class="fa-solid fa-calendar-days"></i> {{ t('list.calendarView') }}
           </button>
           <button :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
-            <i class="fa-solid fa-list"></i> リスト
+            <i class="fa-solid fa-list"></i> {{ t('list.listView') }}
           </button>
         </div>
         <div v-if="viewMode === 'calendar'" class="cal-nav">
@@ -62,25 +61,25 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEntries } from '../composables/useEntries';
 import FilterPanel from '../components/list/FilterPanel.vue';
 import EntryTable from '../components/list/EntryTable.vue';
 import MonthCalendar from '../components/list/MonthCalendar.vue';
 
+const { t, locale } = useI18n();
 const { entries, isLoading, error, loadEntries, removeEntry, removeBulk, suggestCategories, isLoaded } = useEntries();
 const currentFilters = ref(null);
-const viewMode = ref('calendar'); // 'calendar' | 'list'
-const calendarMonth = ref(null);  // カレンダー表示用の月 (YYYY-MM)
+const viewMode = ref('calendar');
+const calendarMonth = ref(null);
 const filterPanelRef = ref(null);
 
 const isMonthMode = computed(() => currentFilters.value?.periodType === 'month');
 
-// FilterPanel の月が変わったらカレンダー月を同期（ナビボタンによる変更は除く）
 watch(() => currentFilters.value?.periodValue, (val) => {
   if (isMonthMode.value && val && val !== calendarMonth.value) calendarMonth.value = val;
 }, { immediate: true });
 
-// 月別以外に切り替えたらリストに戻す
 watch(isMonthMode, (v) => {
   if (!v) viewMode.value = 'list';
   else {
@@ -92,6 +91,9 @@ watch(isMonthMode, (v) => {
 const calendarMonthLabel = computed(() => {
   if (!calendarMonth.value) return '';
   const [y, m] = calendarMonth.value.split('-');
+  if (locale.value === 'en') {
+    return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+  }
   return `${y}年${parseInt(m)}月`;
 });
 
@@ -115,32 +117,26 @@ const nextMonth = () => {
 
 const filteredEntries = computed(() => {
   if (!currentFilters.value) return entries.value;
-
   let result = entries.value;
   const { periodType, periodValue, type, category } = currentFilters.value;
-
   if (periodType === 'month') {
     const target = (viewMode.value === 'calendar' && calendarMonth.value) ? calendarMonth.value : periodValue;
     if (target) result = result.filter(e => e.date.startsWith(target));
   } else if (periodType === 'year' && periodValue) {
     result = result.filter(e => e.date.startsWith(periodValue));
   }
-
   if (type) result = result.filter(e => e.type === type);
   if (category) result = result.filter(e => e.category === category);
-
   return result;
 });
 
-const handleFilterChange = (filters) => {
-  currentFilters.value = filters;
-};
+const handleFilterChange = (filters) => { currentFilters.value = filters; };
 
 const handleDelete = async (id) => {
   try {
     await removeEntry(id);
   } catch (err) {
-    alert('削除に失敗しました: ' + err.message);
+    alert(t('list.deleteError', { msg: err.message }));
   }
 };
 
@@ -152,14 +148,10 @@ const handleBulkDelete = async (ids) => {
   }
 };
 
-const forceReload = () => {
-  loadEntries();
-};
+const forceReload = () => loadEntries();
 
 onMounted(() => {
-  if (!isLoaded.value) {
-    loadEntries();
-  }
+  if (!isLoaded.value) loadEntries();
 });
 </script>
 
@@ -174,31 +166,6 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
-}
-
-.btn-export {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-sub);
-  font-size: 0.9rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.btn-export:hover:not(:disabled) {
-  background: var(--surface-hover);
-  color: var(--text-main);
-}
-
-.btn-export:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
 }
 
 .page-title {
@@ -232,10 +199,7 @@ onMounted(() => {
   animation: spin 1s ease-in-out infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

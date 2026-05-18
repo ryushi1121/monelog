@@ -2,90 +2,84 @@
   <div class="dashboard-view">
     <div class="page-header">
       <div class="header-main">
-        <h1 class="page-title">ダッシュボード</h1>
-        <p class="page-subtitle">{{ displayPeriodStr }}の状況</p>
+        <h1 class="page-title">{{ t('dashboard.title') }}</h1>
+        <p class="page-subtitle">{{ t('dashboard.subtitle', { period: displayPeriodStr }) }}</p>
       </div>
-      
+
       <div class="dashboard-controls">
         <router-link to="/entry" class="btn btn-action register-btn">
-          <i class="fa-solid fa-pen-to-square"></i> 記録する
+          <i class="fa-solid fa-pen-to-square"></i> {{ t('dashboard.recordBtn') }}
         </router-link>
 
         <div class="view-mode-toggle">
           <label class="radio-label">
             <input type="radio" v-model="viewMode" value="month" @change="onPeriodChange" />
-            月
+            {{ t('dashboard.monthTab') }}
           </label>
           <label class="radio-label">
             <input type="radio" v-model="viewMode" value="year" @change="onPeriodChange" />
-            年
+            {{ t('dashboard.yearTab') }}
           </label>
         </div>
-        
+
         <div class="period-navigation">
-          <input 
-            v-if="viewMode === 'month'" 
-            type="month" 
+          <input
+            v-if="viewMode === 'month'"
+            type="month"
             v-model="selectedMonthStr"
             class="period-input"
           />
           <div v-else class="year-input-wrapper">
-            <input 
-              type="number" 
-              v-model="selectedYearStr" 
+            <input
+              type="number"
+              v-model="selectedYearStr"
               class="period-input year-input"
-              min="2000" 
-              max="2100" 
+              min="2000"
+              max="2100"
             />
-            <span class="year-label">年</span>
+            <span v-if="locale === 'ja'" class="year-label">年</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ローディング状態 -->
     <div v-if="isLoading" class="loading-state">
       <div class="spinner"></div>
-      <p>データを読み込み中...</p>
+      <p>{{ t('common.loading') }}</p>
     </div>
 
-    <!-- エラー状態 -->
     <div v-else-if="error" class="error-state">
       <p>{{ error }}</p>
-      <button @click="forceReload" class="btn btn-outline">再試行</button>
+      <button @click="forceReload" class="btn btn-outline">{{ t('common.retry') }}</button>
     </div>
 
     <div v-else class="dashboard-content">
-      <!-- サマリーカード群 -->
       <div class="summary-cards">
         <SummaryCard
-          :title="`${targetPeriodText}の収入`"
+          :title="t('dashboard.income', { period: targetPeriodText })"
           :amount="currentPeriodStats.totalIncome"
-          subtitle="Total Income"
+          :subtitle="t('summaryCard.income')"
         />
         <SummaryCard
-          :title="`${targetPeriodText}の支出`"
+          :title="t('dashboard.expense', { period: targetPeriodText })"
           :amount="currentPeriodStats.totalExpense"
-          subtitle="Total Expense"
+          :subtitle="t('summaryCard.expense')"
         />
         <SummaryCard
-          :title="`${targetPeriodText}の貯金・投資`"
+          :title="t('dashboard.savingsInvestment', { period: targetPeriodText })"
           :amount="currentPeriodStats.totalSavingsAndInvestment"
-          subtitle="Savings &amp; Investment"
+          :subtitle="t('summaryCard.savingsInvestment')"
         />
         <SummaryCard
-          :title="`${targetPeriodText}の純残高`"
+          :title="t('dashboard.net', { period: targetPeriodText })"
           :amount="currentPeriodStats.net"
           :isProfit="true"
-          subtitle="Net Balance"
+          :subtitle="t('summaryCard.net')"
         />
       </div>
 
       <div class="dashboard-grid">
-        <!-- クイック統計 -->
-        <QuickStats :entries="currentPeriodEntries" :title="`${targetPeriodText}の明細サマリー`" class="grid-item" />
-
-        <!-- 直近の履歴 -->
+        <QuickStats :entries="currentPeriodEntries" :title="t('quickStats.title') + ' — ' + targetPeriodText" class="grid-item" />
         <RecentHistory :entries="entries" :limit="5" class="grid-item" />
       </div>
     </div>
@@ -94,18 +88,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEntries } from '../composables/useEntries';
 import SummaryCard from '../components/dashboard/SummaryCard.vue';
 import QuickStats from '../components/dashboard/QuickStats.vue';
 import RecentHistory from '../components/dashboard/RecentHistory.vue';
 
+const { t, locale } = useI18n();
 const { entries, isLoading, error, loadEntries, isLoaded } = useEntries();
 
-// 状態
-const viewMode = ref('month'); // 'month' or 'year'
+const viewMode = ref('month');
 const currentDate = ref(new Date());
 
-// 表示用の期間文字列
 const selectedMonthStr = computed({
   get: () => {
     const year = currentDate.value.getFullYear();
@@ -123,55 +117,36 @@ const selectedMonthStr = computed({
 const selectedYearStr = computed({
   get: () => currentDate.value.getFullYear(),
   set: (val) => {
-    if (val) {
-      currentDate.value = new Date(val, 0, 1);
-    }
+    if (val) currentDate.value = new Date(val, 0, 1);
   }
 });
 
-// 現在の表示期間の文字列 (ヘッダー等に表示用)
 const displayPeriodStr = computed(() => {
+  if (locale.value === 'en') {
+    const opts = viewMode.value === 'month'
+      ? { year: 'numeric', month: 'long' }
+      : { year: 'numeric' };
+    return currentDate.value.toLocaleDateString('en-US', opts);
+  }
   if (viewMode.value === 'month') {
     return `${currentDate.value.getFullYear()}年${currentDate.value.getMonth() + 1}月`;
-  } else {
-    return `${currentDate.value.getFullYear()}年`;
   }
+  return `${currentDate.value.getFullYear()}年`;
 });
 
-const targetPeriodText = computed(() => {
-  return displayPeriodStr.value;
-});
+const targetPeriodText = computed(() => displayPeriodStr.value);
 
-// 未来の期間かどうか（次へボタンの無効化用）
-const isFuturePeriod = computed(() => {
-  const now = new Date();
-  if (viewMode.value === 'month') {
-    return currentDate.value.getFullYear() === now.getFullYear() && 
-           currentDate.value.getMonth() >= now.getMonth();
-  } else {
-    return currentDate.value.getFullYear() >= now.getFullYear();
-  }
-});
-
-// 表示期間のデータをフィルタリング
 const currentPeriodEntries = computed(() => {
   const targetYear = currentDate.value.getFullYear();
   const targetMonth = String(currentDate.value.getMonth() + 1).padStart(2, '0');
-  
   return entries.value.filter(e => {
-    if (viewMode.value === 'month') {
-      return e.date.startsWith(`${targetYear}-${targetMonth}`);
-    } else {
-      return e.date.startsWith(`${targetYear}`);
-    }
+    if (viewMode.value === 'month') return e.date.startsWith(`${targetYear}-${targetMonth}`);
+    return e.date.startsWith(`${targetYear}`);
   });
 });
 
 const currentPeriodStats = computed(() => {
-  let totalIncome = 0;
-  let totalExpense = 0;
-  let totalSavings = 0;
-  let totalInvestment = 0;
+  let totalIncome = 0, totalExpense = 0, totalSavings = 0, totalInvestment = 0;
   currentPeriodEntries.value.forEach(e => {
     const amount = e.amount || 0;
     if (e.type === '収入')      totalIncome     += amount;
@@ -180,31 +155,18 @@ const currentPeriodStats = computed(() => {
     else                        totalExpense     += amount;
   });
   return {
-    totalIncome,
-    totalExpense,
-    totalSavings,
-    totalInvestment,
+    totalIncome, totalExpense, totalSavings, totalInvestment,
     totalSavingsAndInvestment: totalSavings + totalInvestment,
     net: totalIncome - totalExpense - totalSavings - totalInvestment,
   };
 });
 
-const onPeriodChange = () => {
-  // ローカルでフィルタされるため再取得不要
-};
+const onPeriodChange = () => {};
 
-const loadData = () => {
-  if (!isLoaded.value) {
-    loadEntries(); // 全データを取得
-  }
-};
-
-const forceReload = () => {
-  loadEntries(); // 明示的な再試行時は全データを再取得
-};
+const forceReload = () => loadEntries();
 
 onMounted(() => {
-  loadData();
+  if (!isLoaded.value) loadEntries();
 });
 </script>
 

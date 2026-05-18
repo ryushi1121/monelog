@@ -1,10 +1,10 @@
 <template>
   <div class="entry-view">
     <div class="page-header">
-      <h1 class="page-title">{{ isEdit ? '記録を編集' : '記録する' }}</h1>
-      <p class="page-subtitle">{{ isEdit ? '記録内容を修正します' : '収入・支出を記録しましょう' }}</p>
+      <h1 class="page-title">{{ isEdit ? t('entry.editTitle') : t('entry.title') }}</h1>
+      <p class="page-subtitle">{{ isEdit ? t('entry.editSubtitle') : t('entry.subtitle') }}</p>
     </div>
-    
+
     <div class="entry-content">
       <EntryForm :entryId="route.params.id" />
     </div>
@@ -14,9 +14,11 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import EntryForm from '../components/entry/EntryForm.vue';
 
 const route = useRoute();
+const { t } = useI18n();
 const isEdit = computed(() => !!route.params.id);
 </script>
 
@@ -51,13 +53,7 @@ const isEdit = computed(() => !!route.params.id);
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

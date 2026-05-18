@@ -1,15 +1,13 @@
 <template>
   <div class="entry-list-container">
-    <!-- 一括削除バー -->
     <div v-if="selectedIds.size > 0" class="bulk-bar">
-      <span class="bulk-count">{{ selectedIds.size }}件選択中</span>
+      <span class="bulk-count">{{ t('list.selected', { n: selectedIds.size }) }}</span>
       <button class="btn btn-danger btn-sm" @click="confirmBulkDelete">
-        <i class="fa-solid fa-trash"></i> 一括削除
+        <i class="fa-solid fa-trash"></i> {{ t('list.bulkDelete') }}
       </button>
-      <button class="btn btn-ghost btn-sm" @click="clearSelection">選択解除</button>
+      <button class="btn btn-ghost btn-sm" @click="clearSelection">{{ t('list.deselect') }}</button>
     </div>
 
-    <!-- リストヘッダー -->
     <div class="list-header">
       <label class="check-wrap" @click.stop>
         <input
@@ -20,17 +18,15 @@
         />
       </label>
       <button class="sort-btn" @click="sortAsc = !sortAsc">
-        日付 <i class="fa-solid" :class="sortAsc ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+        {{ t('list.sortDate') }} <i class="fa-solid" :class="sortAsc ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
       </button>
       <span class="header-total" v-if="groupedByDate.length > 0">
-        計 {{ sortedEntries.length }}件
+        {{ t('common.total') }} {{ sortedEntries.length }}{{ t('quickStats.unitCount') }}
       </span>
     </div>
 
     <div v-if="groupedByDate.length > 0">
-      <!-- 日付グループ -->
       <div v-for="group in groupedByDate" :key="group.date" class="date-group">
-        <!-- 日付ヘッダー行 -->
         <div
           class="group-header"
           :class="{ 'is-expanded': expandedDates.has(group.date) }"
@@ -45,8 +41,8 @@
             />
           </label>
           <div class="group-date-info">
-            <span class="group-date">{{ formatDateDisplay(group.date) }}（{{ group.entries[0].dayOfWeek }}）</span>
-            <span class="group-count">{{ group.entries.length }}件</span>
+            <span class="group-date">{{ formatDateDisplay(group.date) }}（{{ t(`weekdays.${group.entries[0].dayOfWeek}`, group.entries[0].dayOfWeek) }}）</span>
+            <span class="group-count">{{ group.entries.length }}{{ t('quickStats.unitCount') }}</span>
           </div>
           <span class="group-profit" :class="getProfitClass(group.net)">
             {{ formatProfit(group.net) }}
@@ -54,7 +50,6 @@
           <i class="fa-solid fa-chevron-right group-chevron" :class="{ 'is-open': expandedDates.has(group.date) }"></i>
         </div>
 
-        <!-- アコーディオン本体 -->
         <transition name="accordion">
           <div v-if="expandedDates.has(group.date)" class="group-body">
             <div
@@ -78,11 +73,11 @@
                     'badge-savings':    entry.type === '貯金',
                     'badge-investment': entry.type === '投資',
                     'badge-expense':    entry.type === '支出',
-                  }">{{ entry.type }}</span>
-                  {{ entry.category }}
+                  }">{{ t(`types.${typeKey(entry.type)}`) }}</span>
+                  {{ t(`sysCategories.${entry.category}`, entry.category) }}
                 </span>
                 <span class="entry-machine">
-                  {{ entry.subcategory }}
+                  {{ entry.subcategory ? t(`sysCategories.${entry.subcategory}`, entry.subcategory) : '' }}
                   <span v-if="entry.memo" class="entry-memo">{{ entry.memo }}</span>
                 </span>
               </div>
@@ -97,10 +92,10 @@
                 </span>
               </div>
               <div class="entry-actions" @click.stop>
-                <button class="btn-icon icon-edit" @click="editEntry(entry)" title="編集">
+                <button class="btn-icon icon-edit" @click="editEntry(entry)" :title="t('list.edit')">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button class="btn-icon icon-delete" @click="confirmDelete(entry)" title="削除">
+                <button class="btn-icon icon-delete" @click="confirmDelete(entry)" :title="t('list.delete')">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
@@ -109,9 +104,8 @@
         </transition>
       </div>
 
-      <!-- 合計行 -->
       <div class="summary-row">
-        <span class="summary-label">合計</span>
+        <span class="summary-label">{{ t('common.total') }}</span>
         <span class="summary-profit" :class="getProfitClass(totalNet)">{{ formatProfit(totalNet) }}</span>
         <span class="summary-inv">
           <span class="text-success">+{{ formatCurrency(totalIncome) }}</span>
@@ -122,7 +116,7 @@
     </div>
 
     <div v-else class="empty-state">
-      <p>条件に一致するデータがありません</p>
+      <p>{{ t('common.empty') }}</p>
     </div>
   </div>
 </template>
@@ -130,10 +124,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { formatDateDisplay } from '../../utils/dateUtils';
 import { formatCurrency, formatProfit } from '../../utils/formatters';
+import { TYPE_KEY_MAP } from '../../composables/useLocale';
 
 const router = useRouter();
+const { t } = useI18n();
 
 const props = defineProps({
   entries: { type: Array, required: true }
@@ -141,7 +138,11 @@ const props = defineProps({
 
 const emit = defineEmits(['delete-entry', 'bulk-delete']);
 
-// ---- ソート ----
+const typeKey = (type) => {
+  const map = { '支出': 'expense', '収入': 'income', '貯金': 'savings', '投資': 'investment' };
+  return map[type] || 'expense';
+};
+
 const sortAsc = ref(false);
 
 const sortedEntries = computed(() => {
@@ -151,7 +152,6 @@ const sortedEntries = computed(() => {
   });
 });
 
-// ---- 日付グループ化 ----
 const groupedByDate = computed(() => {
   const map = new Map();
   for (const entry of sortedEntries.value) {
@@ -168,10 +168,8 @@ const groupedByDate = computed(() => {
   });
 });
 
-// ---- アコーディオン ----
 const expandedDates = ref(new Set());
 
-// 初回ロード時に最初のグループを展開
 watch(groupedByDate, (groups) => {
   if (groups.length > 0 && expandedDates.value.size === 0) {
     expandedDates.value = new Set([groups[0].date]);
@@ -184,7 +182,6 @@ const toggleGroup = (date) => {
   expandedDates.value = next;
 };
 
-// ---- チェックボックス ----
 const selectedIds = ref(new Set());
 
 watch(() => props.entries, () => { selectedIds.value = new Set(); });
@@ -227,18 +224,16 @@ const toggleGroupSelection = (group) => {
 };
 
 const confirmBulkDelete = () => {
-  if (window.confirm(`選択した ${selectedIds.value.size} 件を削除しますか？\n（この操作は元に戻せません）`)) {
+  if (window.confirm(t('list.bulkDeleteConfirm', { n: selectedIds.value.size }))) {
     emit('bulk-delete', [...selectedIds.value]);
     selectedIds.value = new Set();
   }
 };
 
-// ---- 合計 ----
 const totalIncome  = computed(() => props.entries.filter(e => e.type === '収入').reduce((s, e) => s + (e.amount || 0), 0));
 const totalExpense = computed(() => props.entries.filter(e => e.type !== '収入').reduce((s, e) => s + (e.amount || 0), 0));
 const totalNet     = computed(() => totalIncome.value - totalExpense.value);
 
-// ---- ユーティリティ ----
 const getProfitClass = (profit) => {
   if (profit > 0) return 'positive';
   if (profit < 0) return 'negative';
@@ -250,7 +245,7 @@ const editEntry = (entry) => {
 };
 
 const confirmDelete = (entry) => {
-  if (window.confirm(`${entry.date}「${entry.category}」の記録を削除しますか？\n（この操作は元に戻せません）`)) {
+  if (window.confirm(t('list.deleteRowConfirm', { date: entry.date, category: entry.category }))) {
     emit('delete-entry', entry.id);
   }
 };
@@ -265,7 +260,6 @@ const confirmDelete = (entry) => {
   overflow: hidden;
 }
 
-/* ---- 一括削除バー ---- */
 .bulk-bar {
   display: flex;
   align-items: center;
@@ -281,7 +275,6 @@ const confirmDelete = (entry) => {
   flex: 1;
 }
 
-/* ---- リストヘッダー ---- */
 .list-header {
   display: flex;
   align-items: center;
@@ -310,7 +303,6 @@ const confirmDelete = (entry) => {
   color: var(--text-faded);
 }
 
-/* ---- チェックボックス共通 ---- */
 .check-wrap {
   display: flex;
   align-items: center;
@@ -324,7 +316,6 @@ const confirmDelete = (entry) => {
   cursor: pointer;
 }
 
-/* ---- 日付グループ ---- */
 .date-group {
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -381,7 +372,6 @@ const confirmDelete = (entry) => {
   transform: rotate(90deg);
 }
 
-/* ---- アコーディオンアニメーション ---- */
 .accordion-enter-active,
 .accordion-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -393,7 +383,6 @@ const confirmDelete = (entry) => {
   transform: scaleY(0.95);
 }
 
-/* ---- エントリ行 ---- */
 .group-body {
   background: var(--overlay-1);
 }
@@ -469,16 +458,6 @@ const confirmDelete = (entry) => {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.entry-inv {
-  font-size: 0.75rem;
-  color: var(--text-faded);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.inv-sep {
-  color: var(--text-faded);
-  margin: 0 2px;
-}
 
 .entry-actions {
   display: flex;
@@ -486,7 +465,6 @@ const confirmDelete = (entry) => {
   flex-shrink: 0;
 }
 
-/* ---- 合計行 ---- */
 .summary-row {
   display: flex;
   align-items: center;
@@ -512,14 +490,12 @@ const confirmDelete = (entry) => {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- カラー ---- */
 .positive   { color: var(--success-color); }
 .negative   { color: var(--danger-color); }
 .zero       { color: var(--text-sub); }
 .savings    { color: #eab308; }
 .investment { color: #3b82f6; }
 
-/* ---- アクションボタン ---- */
 .btn-icon {
   background: transparent;
   border: none;
@@ -534,20 +510,17 @@ const confirmDelete = (entry) => {
 .icon-edit   { color: var(--accent-primary); }
 .icon-delete { color: var(--danger-color); }
 
-/* ---- 空状態 ---- */
 .empty-state {
   padding: 4rem 2rem;
   text-align: center;
   color: var(--text-faded);
 }
 
-/* ---- 共通ボタン ---- */
 .btn-danger {
   background: var(--color-lose-bg);
   color: var(--danger-color);
   border: 1px solid var(--color-lose-border);
 }
-.btn-danger:hover { background: rgba(var(--danger-color), 0.22); }
 .btn-ghost {
   background: transparent;
   color: var(--text-sub);
@@ -562,5 +535,9 @@ const confirmDelete = (entry) => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+.inv-sep {
+  color: var(--text-faded);
+  margin: 0 2px;
 }
 </style>

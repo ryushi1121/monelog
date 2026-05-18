@@ -1,15 +1,16 @@
 <template>
   <div class="chart-container card mb-4">
-    <h3>曜日別 平均支出</h3>
+    <h3>{{ t('charts.weekdayAvgExpense') }}</h3>
     <div class="chart-wrapper">
       <Bar :data="chartData" :options="chartOptions" v-if="weekdayStats.length > 0" />
-      <div v-else class="empty-state text-muted text-center py-4">データがありません</div>
+      <div v-else class="empty-state text-muted text-center py-4">{{ t('common.noData') }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Bar } from 'vue-chartjs';
 import { useTheme } from '@/composables/useTheme';
 import {
@@ -37,6 +38,7 @@ ChartJS.register(
 
 const { weekdayStats } = useAnalytics();
 const { theme } = useTheme();
+const { t } = useI18n();
 
 const cc = computed(() => {
   const isLight = theme.value === 'light';
@@ -48,10 +50,10 @@ const cc = computed(() => {
 
 const chartData = computed(() => {
   return {
-    labels: weekdayStats.value.map(s => s.name),
+    labels: weekdayStats.value.map(s => t(`weekdays.${s.name}`, s.name)),
     datasets: [
       {
-        label: '平均支出',
+        label: t('charts.avgExpense'),
         data: weekdayStats.value.map(s => s.avgExpense),
         backgroundColor: 'rgba(239, 68, 68, 0.7)',
         borderRadius: 4

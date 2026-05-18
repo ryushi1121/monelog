@@ -10,6 +10,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useTheme } from '@/composables/useTheme';
 import { Chart as VueChart } from 'vue-chartjs';
 import {
@@ -32,6 +33,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, LineElem
 
 const { trendChartData } = useAnalytics();
 const { theme } = useTheme();
+const { t, locale } = useI18n();
 
 const cc = computed(() => {
   const isLight = theme.value === 'light';
@@ -50,7 +52,7 @@ const chartData = computed(() => {
     datasets: [
       {
         type: 'bar',
-        label: '明細',
+        label: t('charts.trend'),
         data: data.nets,
         backgroundColor: data.nets.map(v =>
           v === null ? 'transparent' : v >= 0 ? 'rgba(34,197,94,0.7)' : 'rgba(239,68,68,0.7)'
@@ -63,7 +65,7 @@ const chartData = computed(() => {
       },
       {
         type: 'line',
-        label: '残高推移',
+        label: t('charts.cumulative'),
         data: data.cumulative,
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59,130,246,0.1)',
@@ -93,7 +95,7 @@ const chartOptions = computed(() => {
           label: (ctx) => {
             const val = ctx.parsed.y;
             if (val === null) return null;
-            return `${ctx.dataset.label}: ${val >= 0 ? '+' : ''}${val.toLocaleString()}円`;
+            return `${ctx.dataset.label}: ${val >= 0 ? '+' : ''}¥${Math.abs(val).toLocaleString()}`;
           }
         }
       },
@@ -112,7 +114,7 @@ const chartOptions = computed(() => {
         ticks: {
           color: cc.value.textSub,
           font: { size: 11 },
-          callback: v => `${Math.round(v / 1000)}千`
+          callback: v => locale.value === 'en' ? `${Math.round(v / 1000)}K` : `${Math.round(v / 1000)}千`
         },
         grid: { color: cc.value.grid }
       },
@@ -124,7 +126,7 @@ const chartOptions = computed(() => {
         ticks: {
           color: '#3b82f6',
           font: { size: 11 },
-          callback: v => `${Math.round(v / 1000)}千`
+          callback: v => locale.value === 'en' ? `${Math.round(v / 1000)}K` : `${Math.round(v / 1000)}千`
         },
         grid: { drawOnChartArea: false }
       }

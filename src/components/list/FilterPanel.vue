@@ -1,11 +1,10 @@
 <template>
   <div class="filter-panel card">
-    <!-- 期間行 -->
     <div class="selector-row">
       <div class="period-tabs">
-        <button :class="{ active: filters.periodType === 'all' }" @click="setPeriod('all')">全期間</button>
-        <button :class="{ active: filters.periodType === 'year' }" @click="setPeriod('year')">年別</button>
-        <button :class="{ active: filters.periodType === 'month' }" @click="setPeriod('month')">月別</button>
+        <button :class="{ active: filters.periodType === 'all' }" @click="setPeriod('all')">{{ t('period.all') }}</button>
+        <button :class="{ active: filters.periodType === 'year' }" @click="setPeriod('year')">{{ t('period.year') }}</button>
+        <button :class="{ active: filters.periodType === 'month' }" @click="setPeriod('month')">{{ t('period.month') }}</button>
       </div>
       <input
         v-if="filters.periodType === 'month'"
@@ -18,50 +17,46 @@
         v-model="filters.periodValue"
         class="period-input"
       >
-        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}年</option>
+        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
       </select>
     </div>
 
-    <!-- 種別行 -->
     <div class="selector-row sub-row">
-      <label class="row-label">種別</label>
+      <label class="row-label">{{ t('filter.type') }}</label>
       <select v-model="filters.type" class="row-select">
-        <option value="">すべて</option>
-        <option value="支出">支出</option>
-        <option value="収入">収入</option>
+        <option value="">{{ t('filter.allTypes') }}</option>
+        <option value="支出">{{ t('types.expense') }}</option>
+        <option value="収入">{{ t('types.income') }}</option>
       </select>
     </div>
 
-    <!-- カテゴリ行 -->
     <div class="selector-row sub-row">
-      <label class="row-label">カテゴリ</label>
+      <label class="row-label">{{ t('filter.category') }}</label>
       <select v-model="filters.category" class="row-select">
-        <option value="">すべてのカテゴリ</option>
-        <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+        <option value="">{{ t('filter.allCategories') }}</option>
+        <option v-for="cat in categories" :key="cat" :value="cat">{{ t(`sysCategories.${cat}`, cat) }}</option>
       </select>
     </div>
 
-    <!-- リセット行 -->
     <div class="selector-row sub-row">
-      <button @click="resetFilters" class="reset-btn">リセット</button>
+      <button @click="resetFilters" class="reset-btn">{{ t('common.reset') }}</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { reactive, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { getMonthString } from '../../utils/dateUtils';
 import { useEntries } from '../../composables/useEntries';
 
 const props = defineProps({
-  categories: {
-    type: Array,
-    default: () => []
-  },
+  categories: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(['filter-change']);
 
+const { t } = useI18n();
 const { entries } = useEntries();
 
 const availableYears = computed(() => {
@@ -135,7 +130,6 @@ defineExpose({
   padding-top: 10px;
 }
 
-/* 期間タブ */
 .period-tabs {
   display: flex;
   gap: 8px;
@@ -152,9 +146,7 @@ defineExpose({
   font-size: 0.9rem;
 }
 
-.period-tabs button:hover {
-  background: var(--surface-hover);
-}
+.period-tabs button:hover { background: var(--surface-hover); }
 
 .period-tabs button.active {
   background: var(--accent-primary);
@@ -163,7 +155,6 @@ defineExpose({
   font-weight: 600;
 }
 
-/* 期間値 input / select */
 .period-input {
   padding: 7px 12px;
   border-radius: 8px;
@@ -175,9 +166,7 @@ defineExpose({
   font-family: inherit;
 }
 
-.period-input:focus {
-  border-color: var(--accent-primary);
-}
+.period-input:focus { border-color: var(--accent-primary); }
 
 .period-input option {
   background: var(--bg-input);
@@ -190,7 +179,6 @@ defineExpose({
   opacity: 0.8;
 }
 
-/* 絞り込み行 */
 .row-label {
   font-size: 0.85rem;
   color: var(--text-sub);
@@ -209,16 +197,13 @@ defineExpose({
   min-width: 160px;
 }
 
-.row-select:focus {
-  border-color: var(--accent-primary);
-}
+.row-select:focus { border-color: var(--accent-primary); }
 
 .row-select option {
   background: var(--bg-input);
   color: var(--text-main);
 }
 
-/* リセットボタン */
 .reset-btn {
   padding: 7px 16px;
   border-radius: 20px;

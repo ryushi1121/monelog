@@ -15,7 +15,11 @@
     </div>
 
     <div class="header-right">
-      <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? 'ライトテーマに切替' : 'ダークテーマに切替'">
+      <button
+        class="theme-toggle"
+        @click="toggleTheme"
+        :title="theme === 'dark' ? t('header.switchToLight') : t('header.switchToDark')"
+      >
         <i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
       </button>
       <div v-if="user" class="user-info">
@@ -27,7 +31,7 @@
         />
         <span class="user-name">{{ user.name }}</span>
         <button class="btn btn-ghost btn-sm" @click="$emit('logout')" id="logout-btn">
-          ログアウト
+          {{ t('header.logout') }}
         </button>
       </div>
     </div>
@@ -36,6 +40,7 @@
 
 <script>
 import { useTheme } from '../../composables/useTheme';
+import { useI18n } from 'vue-i18n';
 export default {
   name: 'AppHeader',
   props: {
@@ -45,7 +50,8 @@ export default {
   emits: ['toggle-sidebar', 'logout'],
   setup() {
     const { theme, toggleTheme } = useTheme();
-    return { theme, toggleTheme };
+    const { t } = useI18n();
+    return { theme, toggleTheme, t };
   }
 }
 </script>

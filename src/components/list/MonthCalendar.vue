@@ -56,8 +56,8 @@
           @click="editEntry(entry)"
         >
           <div class="dpe-main">
-            <span class="dpe-store">{{ entry.category }}</span>
-            <span class="dpe-machine">{{ entry.subcategory }}</span>
+            <span class="dpe-store">{{ t(`sysCategories.${entry.category}`, entry.category) }}</span>
+            <span class="dpe-machine">{{ entry.subcategory ? t(`sysCategories.${entry.subcategory}`, entry.subcategory) : '' }}</span>
           </div>
           <div class="dpe-right">
             <span class="dpe-profit" :class="{
@@ -78,10 +78,12 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { formatProfit, formatCurrency } from '../../utils/formatters';
 
 const router = useRouter();
+const { t } = useI18n();
 
 const props = defineProps({
   entries:   { type: Array,  required: true },

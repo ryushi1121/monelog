@@ -11,7 +11,7 @@
         :id="'nav-' + item.id"
       >
         <i class="nav-icon" :class="item.icon"></i>
-        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-label">{{ t(item.labelKey) }}</span>
       </router-link>
     </nav>
 
@@ -20,7 +20,6 @@
     </div>
   </aside>
 
-  <!-- モバイル用オーバーレイ -->
   <div
     v-if="open"
     class="sidebar-overlay"
@@ -28,32 +27,26 @@
   ></div>
 </template>
 
-<script>
-export default {
-  name: 'AppSidebar',
-  props: {
-    open: { type: Boolean, default: false }
-  },
-  emits: ['close'],
-  setup(props, { emit }) {
-    const navItems = [
-      { to: '/', label: 'ダッシュボード', icon: 'fa-solid fa-house', id: 'dashboard' },
-      { to: '/entry', label: '記録する', icon: 'fa-solid fa-receipt', id: 'entry' },
-      { to: '/list', label: '明細一覧', icon: 'fa-solid fa-wallet', id: 'list' },
-      { to: '/analytics', label: '集計', icon: 'fa-solid fa-chart-pie', id: 'analytics' },
-      { to: '/charts', label: '分析', icon: 'fa-solid fa-chart-line', id: 'charts' },
-      { to: '/settings', label: '設定', icon: 'fa-solid fa-gear', id: 'settings' }
-    ]
+<script setup>
+import { useI18n } from 'vue-i18n';
 
-    const handleNavClick = () => {
-      if (window.innerWidth < 1024) {
-        emit('close')
-      }
-    }
+const props = defineProps({ open: { type: Boolean, default: false } });
+const emit = defineEmits(['close']);
 
-    return { navItems, handleNavClick }
-  }
-}
+const { t } = useI18n();
+
+const navItems = [
+  { to: '/',          labelKey: 'nav.dashboard', icon: 'fa-solid fa-house',      id: 'dashboard' },
+  { to: '/entry',     labelKey: 'nav.record',    icon: 'fa-solid fa-receipt',    id: 'entry' },
+  { to: '/list',      labelKey: 'nav.list',      icon: 'fa-solid fa-wallet',     id: 'list' },
+  { to: '/analytics', labelKey: 'nav.analytics', icon: 'fa-solid fa-chart-pie',  id: 'analytics' },
+  { to: '/charts',    labelKey: 'nav.charts',    icon: 'fa-solid fa-chart-line', id: 'charts' },
+  { to: '/settings',  labelKey: 'nav.settings',  icon: 'fa-solid fa-gear',       id: 'settings' },
+];
+
+const handleNavClick = () => {
+  if (window.innerWidth < 1024) emit('close');
+};
 </script>
 
 <style scoped>

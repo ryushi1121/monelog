@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEntries } from './useEntries';
 
 const periodType = ref('month');
@@ -8,6 +9,7 @@ const selectedType = ref('');
 
 export const useAnalytics = () => {
   const { entries } = useEntries();
+  const { locale } = useI18n();
 
   const filteredEntries = computed(() => {
     if (periodType.value === 'all') return entries.value;
@@ -124,7 +126,10 @@ export const useAnalytics = () => {
       return { labels, nets, expenses, incomes, cumulative };
     };
 
-    const selectionSuffix = selectedCategory.value ? `（${selectedCategory.value}）` : '';
+    const isEn = locale.value === 'en';
+    const selectionSuffix = selectedCategory.value
+      ? (isEn ? ` (${selectedCategory.value})` : `（${selectedCategory.value}）`)
+      : '';
 
     if (periodType.value === 'month' && periodValue.value) {
       const [year, month] = periodValue.value.split('-').map(Number);
@@ -149,7 +154,8 @@ export const useAnalytics = () => {
       });
       const keys = Array.from({ length: daysInMonth }, (_, i) => {
         const d = i + 1;
-        return { label: `${d}日`, dateKey: `${periodValue.value}-${String(d).padStart(2, '0')}` };
+        const label = isEn ? `${d}` : `${d}日`;
+        return { label, dateKey: `${periodValue.value}-${String(d).padStart(2, '0')}` };
       });
       const labels = ['', ...keys.map(k => k.label)];
       const expenses = [null, ...keys.map(k => dailyExpense[k.dateKey])];
@@ -163,9 +169,13 @@ export const useAnalytics = () => {
         cum += dailyIncome[k.dateKey] - dailyExpense[k.dateKey] - dailySavings[k.dateKey] - dailyInvestment[k.dateKey];
         cumulative.push(cum);
       });
-      const [y, m] = periodValue.value.split('-').map(Number);
-      const titlePeriod = `${y}年${m}月`;
-      return { labels, nets, expenses, incomes, cumulative, title: `日別明細（${titlePeriod}）${selectionSuffix}` };
+      const titlePeriod = isEn
+        ? new Date(year, month - 1, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+        : `${year}年${month}月`;
+      const title = isEn
+        ? `Daily (${titlePeriod})${selectionSuffix}`
+        : `日別明細（${titlePeriod}）${selectionSuffix}`;
+      return { labels, nets, expenses, incomes, cumulative, title };
     }
 
     if (periodType.value === 'year' && periodValue.value) {
@@ -189,6 +199,7 @@ export const useAnalytics = () => {
         else if (e.type === '投資') monthlyInvestment[m]  = (monthlyInvestment[m]  || 0) + (e.amount || 0);
         else                        monthlyExpense[m]      = (monthlyExpense[m]      || 0) + (e.amount || 0);
       });
+      const monthAbbr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const monthKeys = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
       const result = buildSeries(
         monthKeys,
@@ -196,8 +207,13 @@ export const useAnalytics = () => {
         m => monthlyExpense[m] || 0,
         m => monthlyIncome[m] || 0,
       );
-      result.labels = result.labels.map((l, i) => i === 0 ? '' : `${parseInt(l)}月`);
-      result.title = `月別明細推移（${year}年）${selectionSuffix}`;
+      result.labels = result.labels.map((l, i) => {
+        if (i === 0) return '';
+        return isEn ? (monthAbbr[parseInt(l) - 1] || l) : `${parseInt(l)}月`;
+      });
+      result.title = isEn
+        ? `Monthly (${year})${selectionSuffix}`
+        : `月別明細推移（${year}年）${selectionSuffix}`;
       return result;
     }
 
@@ -225,8 +241,10 @@ export const useAnalytics = () => {
       y => yearlyExpense[y] || 0,
       y => yearlyIncome[y] || 0,
     );
-    result.labels = result.labels.map((l, i) => i === 0 ? '' : `${l}年`);
-    result.title = `年別明細推移（全期間）${selectionSuffix}`;
+    result.labels = result.labels.map((l, i) => i === 0 ? '' : (isEn ? `${l}` : `${l}年`));
+    result.title = isEn
+      ? `All Time${selectionSuffix}`
+      : `年別明細推移（全期間）${selectionSuffix}`;
     return result;
   });
 
